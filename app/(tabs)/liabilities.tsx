@@ -7,17 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  AlertTriangle, 
-  Plus, 
-  Calendar,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Receipt,
-  Zap,
-  ArrowRight
-} from 'lucide-react-native';
+import { TriangleAlert as AlertTriangle, Plus, Calendar, CircleCheck as CheckCircle, Clock, CreditCard, Receipt, Zap, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,

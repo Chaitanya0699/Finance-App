@@ -7,18 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  TrendingUp, 
-  Plus, 
-  Home,
-  Car,
-  Coins,
-  Building2,
-  Briefcase,
-  ArrowUpRight,
-  ArrowDownRight,
-  Calendar
-} from 'lucide-react-native';
+import { TrendingUp, Plus, Chrome as Home, Car, Coins, Building2, Briefcase, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,

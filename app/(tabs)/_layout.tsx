@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Wallet, Calendar, Plus, PiggyBank, TrendingUp, CreditCard, Building2, AlertTriangle } from 'lucide-react-native';
+import { Wallet, Calendar, Plus, PiggyBank, TrendingUp, CreditCard, Building2, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (

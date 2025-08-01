@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, CreditCard, ChartPie as PieChart, Building2, AlertTriangle, Plus, Target } from 'lucide-react-native';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, CreditCard, ChartPie as PieChart, Building2, TriangleAlert as AlertTriangle, Plus, Target } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
