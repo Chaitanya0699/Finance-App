@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "start": "react-native start",
+    "android": "/bin/bash -c 'react-native run-android'",
+    "ios": "/bin/bash -c 'react-native run-ios'",
+    "start": "/bin/bash -c 'react-native start'",
     "test": "jest",
     "lint": "eslint ."
   },
