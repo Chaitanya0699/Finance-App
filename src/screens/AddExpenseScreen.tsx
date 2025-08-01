@@ -9,17 +9,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowLeft,
-  DollarSign,
-  Calendar,
-  Tag,
-  FileText,
-  Check,
-  Plus,
-} from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -78,7 +71,7 @@ export default function AddExpenseScreen() {
     // Here you would typically save to your state management or database
     Alert.alert(
       'Success',
-      `${transactionType === 'expense' ? 'Expense' : 'Income'} of $${amount} added successfully!`,
+      `${transactionType === 'expense' ? 'Expense' : 'Income'} of ₹${amount} added successfully!`,
       [
         {
           text: 'OK',
@@ -172,7 +165,7 @@ export default function AddExpenseScreen() {
                 <Text style={styles.categoryEmoji}>{category.icon}</Text>
                 {selectedCategory === category.id && (
                   <View style={styles.checkOverlay}>
-                    <Check size={16} color="#ffffff" strokeWidth={3} />
+                    <Icon name="check" size={16} color="#ffffff" />
                   </View>
                 )}
               </View>
@@ -194,7 +187,7 @@ export default function AddExpenseScreen() {
     <View style={styles.descriptionContainer}>
       <Text style={styles.sectionLabel}>Description</Text>
       <View style={styles.descriptionInputContainer}>
-        <FileText size={20} color="#64748b" strokeWidth={2} />
+        <Icon name="file-text" size={20} color="#64748b" />
         <TextInput
           style={styles.descriptionInput}
           value={description}
@@ -211,7 +204,7 @@ export default function AddExpenseScreen() {
     <View style={styles.dateContainer}>
       <Text style={styles.sectionLabel}>Date</Text>
       <View style={styles.dateInputContainer}>
-        <Calendar size={20} color="#64748b" strokeWidth={2} />
+        <Icon name="calendar" size={20} color="#64748b" />
         <TextInput
           style={styles.dateInput}
           value={date}
@@ -233,7 +226,7 @@ export default function AddExpenseScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.saveButton}>
-        <Plus size={24} color="#ffffff" strokeWidth={2} />
+        <Icon name="plus" size={24} color="#ffffff" />
         <Text style={styles.saveButtonText}>
           Add {transactionType === 'expense' ? 'Expense' : 'Income'}
         </Text>
@@ -245,6 +238,7 @@ export default function AddExpenseScreen() {
     <KeyboardAvoidingView 
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Add Transaction</Text>
         <Text style={styles.subtitle}>Track your financial activity</Text>

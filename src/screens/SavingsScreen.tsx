@@ -5,27 +5,15 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  PiggyBank, 
-  Target, 
-  TrendingUp, 
-  Calendar,
-  Plus,
-  ArrowUpRight,
-  Coins,
-  CreditCard,
-  Building2
-} from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-
-const { width } = Dimensions.get('window');
 
 interface SavingsGoal {
   id: string;
@@ -78,16 +66,6 @@ const savingsGoals: SavingsGoal[] = [
     color: '#10B981',
     icon: '🚗'
   },
-  {
-    id: '4',
-    name: 'Home Down Payment',
-    targetAmount: 50000,
-    currentAmount: 15000,
-    deadline: '2027-01-01',
-    category: 'Real Estate',
-    color: '#F59E0B',
-    icon: '🏠'
-  }
 ];
 
 const savingsAccounts: SavingsAccount[] = [
@@ -107,14 +85,6 @@ const savingsAccounts: SavingsAccount[] = [
     type: 'fixed_deposit',
     color: '#3B82F6'
   },
-  {
-    id: '3',
-    name: 'Monthly SIP',
-    balance: 8500,
-    interestRate: 5.8,
-    type: 'recurring',
-    color: '#8B5CF6'
-  }
 ];
 
 export default function SavingsScreen() {
@@ -171,7 +141,7 @@ export default function SavingsScreen() {
           <View style={styles.overviewHeader}>
             <Text style={styles.overviewLabel}>Total Savings</Text>
             <View style={styles.savingsIcon}>
-              <PiggyBank size={24} color="#ffffff" strokeWidth={2} />
+              <Icon name="dollar-sign" size={24} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.overviewAmount}>
@@ -246,10 +216,10 @@ export default function SavingsScreen() {
   const renderAccountCard = (account: SavingsAccount) => {
     const getAccountIcon = () => {
       switch (account.type) {
-        case 'savings': return <Coins size={24} color="#ffffff" strokeWidth={2} />;
-        case 'fixed_deposit': return <Building2 size={24} color="#ffffff" strokeWidth={2} />;
-        case 'recurring': return <CreditCard size={24} color="#ffffff" strokeWidth={2} />;
-        default: return <Coins size={24} color="#ffffff" strokeWidth={2} />;
+        case 'savings': return 'dollar-sign';
+        case 'fixed_deposit': return 'home';
+        case 'recurring': return 'credit-card';
+        default: return 'dollar-sign';
       }
     };
 
@@ -271,7 +241,7 @@ export default function SavingsScreen() {
           style={styles.accountGradient}>
           <View style={styles.accountHeader}>
             <View style={styles.accountIconContainer}>
-              {getAccountIcon()}
+              <Icon name={getAccountIcon()} size={24} color="#ffffff" />
             </View>
             <View style={styles.accountInfo}>
               <Text style={styles.accountName}>{account.name}</Text>
@@ -292,7 +262,7 @@ export default function SavingsScreen() {
               Monthly: +₹{((account.balance * account.interestRate) / 100 / 12).toFixed(0)}
             </Text>
             <TouchableOpacity style={styles.accountAction}>
-              <ArrowUpRight size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="arrow-up-right" size={16} color="#ffffff" />
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -303,7 +273,7 @@ export default function SavingsScreen() {
   const renderGoalsProgress = () => (
     <View style={styles.goalsProgressCard}>
       <View style={styles.goalsProgressHeader}>
-        <Target size={24} color="#3B82F6" strokeWidth={2} />
+        <Icon name="target" size={24} color="#3B82F6" />
         <Text style={styles.goalsProgressTitle}>Goals Progress</Text>
       </View>
       <Text style={styles.goalsProgressAmount}>
@@ -334,11 +304,11 @@ export default function SavingsScreen() {
               <Text style={styles.sectionTitle}>Quick Actions</Text>
               <View style={styles.actionButtons}>
                 <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
-                  <Plus size={20} color="#ffffff" strokeWidth={2} />
+                  <Icon name="plus" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>Add Savings</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}>
-                  <Target size={20} color="#ffffff" strokeWidth={2} />
+                  <Icon name="target" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>New Goal</Text>
                 </TouchableOpacity>
               </View>
@@ -351,7 +321,7 @@ export default function SavingsScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Savings Goals</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Plus size={20} color="#3B82F6" strokeWidth={2} />
+                <Icon name="plus" size={20} color="#3B82F6" />
               </TouchableOpacity>
             </View>
             {savingsGoals.map(renderGoalCard)}
@@ -363,7 +333,7 @@ export default function SavingsScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Savings Accounts</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Plus size={20} color="#3B82F6" strokeWidth={2} />
+                <Icon name="plus" size={20} color="#3B82F6" />
               </TouchableOpacity>
             </View>
             {savingsAccounts.map(renderAccountCard)}
@@ -376,6 +346,7 @@ export default function SavingsScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Savings & Goals</Text>
         <Text style={styles.subtitle}>Build your financial future</Text>

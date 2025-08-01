@@ -5,11 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  FlatList,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { CreditCard, Plus, Calendar, TrendingDown, CircleCheck as CheckCircle, Clock, Chrome as Home, Car, User, Building2, ArrowRight } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -63,23 +62,9 @@ const mockLoans: Loan[] = [
     color: '#10B981',
     icon: '🚗'
   },
-  {
-    id: '3',
-    name: 'Personal Loan',
-    type: 'personal',
-    totalAmount: 200000,
-    interestRate: 12.5,
-    startDate: '2024-03-01',
-    repaymentMode: 'full',
-    monthsPaid: 0,
-    status: 'active',
-    color: '#F59E0B',
-    icon: '💰'
-  }
 ];
 
 export default function LoansScreen() {
-  const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<'active' | 'closed'>('active');
   const scaleValue = useSharedValue(1);
 
@@ -113,11 +98,11 @@ export default function LoansScreen() {
 
   const getLoanIcon = (type: string) => {
     switch (type) {
-      case 'home': return <Home size={20} color="#ffffff" strokeWidth={2} />;
-      case 'vehicle': return <Car size={20} color="#ffffff" strokeWidth={2} />;
-      case 'personal': return <User size={20} color="#ffffff" strokeWidth={2} />;
-      case 'education': return <Building2 size={20} color="#ffffff" strokeWidth={2} />;
-      default: return <CreditCard size={20} color="#ffffff" strokeWidth={2} />;
+      case 'home': return 'home';
+      case 'vehicle': return 'truck';
+      case 'personal': return 'user';
+      case 'education': return 'book';
+      default: return 'credit-card';
     }
   };
 
@@ -165,7 +150,7 @@ export default function LoansScreen() {
           <View style={styles.summaryHeader}>
             <Text style={styles.summaryLabel}>Total Outstanding</Text>
             <View style={styles.summaryIcon}>
-              <TrendingDown size={24} color="#ffffff" strokeWidth={2} />
+              <Icon name="trending-down" size={24} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.summaryAmount}>
@@ -199,11 +184,10 @@ export default function LoansScreen() {
       <TouchableOpacity 
         key={loan.id} 
         style={styles.loanCard} 
-        activeOpacity={0.7}
-        onPress={() => router.push(`/loan-details/${loan.id}`)}>
+        activeOpacity={0.7}>
         <View style={styles.loanHeader}>
           <View style={[styles.loanIcon, { backgroundColor: loan.color }]}>
-            {getLoanIcon(loan.type)}
+            <Icon name={getLoanIcon(loan.type)} size={20} color="#ffffff" />
           </View>
           <View style={styles.loanInfo}>
             <Text style={styles.loanName}>{loan.name}</Text>
@@ -211,11 +195,11 @@ export default function LoansScreen() {
           </View>
           <View style={styles.loanStatus}>
             {loan.status === 'active' ? (
-              <Clock size={16} color="#F59E0B" strokeWidth={2} />
+              <Icon name="clock" size={16} color="#F59E0B" />
             ) : (
-              <CheckCircle size={16} color="#10B981" strokeWidth={2} />
+              <Icon name="check-circle" size={16} color="#10B981" />
             )}
-            <ArrowRight size={16} color="#94a3b8" strokeWidth={2} />
+            <Icon name="arrow-right" size={16} color="#94a3b8" />
           </View>
         </View>
 
@@ -261,6 +245,7 @@ export default function LoansScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Loans</Text>
         <Text style={styles.subtitle}>Manage your loan portfolio</Text>
@@ -278,10 +263,8 @@ export default function LoansScreen() {
           <Text style={styles.sectionTitle}>
             {selectedTab === 'active' ? 'Active Loans' : 'Closed Loans'}
           </Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/add-loan')}>
-            <Plus size={20} color="#3B82F6" strokeWidth={2} />
+          <TouchableOpacity style={styles.addButton}>
+            <Icon name="plus" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -292,10 +275,8 @@ export default function LoansScreen() {
             <Text style={styles.emptyStateText}>
               No {selectedTab} loans found
             </Text>
-            <TouchableOpacity 
-              style={styles.addLoanButton}
-              onPress={() => router.push('/add-loan')}>
-              <Plus size={20} color="#ffffff" strokeWidth={2} />
+            <TouchableOpacity style={styles.addLoanButton}>
+              <Icon name="plus" size={20} color="#ffffff" />
               <Text style={styles.addLoanButtonText}>Add Your First Loan</Text>
             </TouchableOpacity>
           </View>

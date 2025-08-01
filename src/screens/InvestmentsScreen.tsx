@@ -5,18 +5,15 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
-  FlatList,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { TrendingUp, TrendingDown, ChartBar as BarChart3, ChartPie as PieChart, DollarSign, Plus, ArrowUpRight, ArrowDownRight, Building2, Briefcase, Globe, Zap } from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-
-const { width } = Dimensions.get('window');
 
 interface Stock {
   id: string;
@@ -66,28 +63,6 @@ const stocks: Stock[] = [
     value: 2142.00,
     color: '#10B981'
   },
-  {
-    id: '3',
-    symbol: 'MSFT',
-    name: 'Microsoft Corp.',
-    price: 378.90,
-    change: 4.15,
-    changePercent: 1.11,
-    shares: 12,
-    value: 4546.80,
-    color: '#8B5CF6'
-  },
-  {
-    id: '4',
-    symbol: 'TSLA',
-    name: 'Tesla Inc.',
-    price: 248.50,
-    change: -8.25,
-    changePercent: -3.21,
-    shares: 8,
-    value: 1988.00,
-    color: '#EF4444'
-  }
 ];
 
 const mutualFunds: MutualFund[] = [
@@ -115,30 +90,6 @@ const mutualFunds: MutualFund[] = [
     risk: 'High',
     color: '#F59E0B'
   },
-  {
-    id: '3',
-    name: 'Bond Index Fund',
-    nav: 28.95,
-    change: 0.05,
-    changePercent: 0.17,
-    units: 300,
-    value: 8685.00,
-    category: 'Debt',
-    risk: 'Low',
-    color: '#10B981'
-  },
-  {
-    id: '4',
-    name: 'International Equity',
-    nav: 38.42,
-    change: 0.78,
-    changePercent: 2.07,
-    units: 100,
-    value: 3842.00,
-    category: 'International',
-    risk: 'High',
-    color: '#8B5CF6'
-  }
 ];
 
 export default function InvestmentsScreen() {
@@ -200,9 +151,9 @@ export default function InvestmentsScreen() {
             <Text style={styles.portfolioLabel}>Portfolio Value</Text>
             <View style={styles.trendIcon}>
               {totalDayChange >= 0 ? (
-                <TrendingUp size={24} color="#ffffff" strokeWidth={2} />
+                <Icon name="trending-up" size={24} color="#ffffff" />
               ) : (
-                <TrendingDown size={24} color="#ffffff" strokeWidth={2} />
+                <Icon name="trending-down" size={24} color="#ffffff" />
               )}
             </View>
           </View>
@@ -223,36 +174,11 @@ export default function InvestmentsScreen() {
     </Animated.View>
   );
 
-  const renderAllocationCard = () => (
-    <View style={styles.allocationCard}>
-      <View style={styles.allocationHeader}>
-        <PieChart size={24} color="#3B82F6" strokeWidth={2} />
-        <Text style={styles.allocationTitle}>Asset Allocation</Text>
-      </View>
-      <View style={styles.allocationItems}>
-        <View style={styles.allocationItem}>
-          <View style={[styles.allocationDot, { backgroundColor: '#3B82F6' }]} />
-          <Text style={styles.allocationLabel}>Stocks</Text>
-          <Text style={styles.allocationValue}>
-            ${totalStocksValue.toLocaleString()} ({((totalStocksValue / totalPortfolioValue) * 100).toFixed(1)}%)
-          </Text>
-        </View>
-        <View style={styles.allocationItem}>
-          <View style={[styles.allocationDot, { backgroundColor: '#10B981' }]} />
-          <Text style={styles.allocationLabel}>Mutual Funds</Text>
-          <Text style={styles.allocationValue}>
-            ${totalMFValue.toLocaleString()} ({((totalMFValue / totalPortfolioValue) * 100).toFixed(1)}%)
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-
   const renderStockCard = (stock: Stock) => (
     <TouchableOpacity key={stock.id} style={styles.stockCard} activeOpacity={0.7}>
       <View style={styles.stockHeader}>
         <View style={[styles.stockIcon, { backgroundColor: stock.color }]}>
-          <Building2 size={20} color="#ffffff" strokeWidth={2} />
+          <Icon name="home" size={20} color="#ffffff" />
         </View>
         <View style={styles.stockInfo}>
           <Text style={styles.stockSymbol}>{stock.symbol}</Text>
@@ -260,9 +186,9 @@ export default function InvestmentsScreen() {
         </View>
         <View style={styles.stockChange}>
           {stock.change >= 0 ? (
-            <ArrowUpRight size={16} color="#10B981" strokeWidth={2} />
+            <Icon name="arrow-up-right" size={16} color="#10B981" />
           ) : (
-            <ArrowDownRight size={16} color="#EF4444" strokeWidth={2} />
+            <Icon name="arrow-down-right" size={16} color="#EF4444" />
           )}
         </View>
       </View>
@@ -285,110 +211,21 @@ export default function InvestmentsScreen() {
     </TouchableOpacity>
   );
 
-  const renderMutualFundCard = (mf: MutualFund) => {
-    const getRiskColor = (risk: string) => {
-      switch (risk) {
-        case 'Low': return '#10B981';
-        case 'Medium': return '#F59E0B';
-        case 'High': return '#EF4444';
-        default: return '#64748B';
-      }
-    };
-
-    const getCategoryIcon = (category: string) => {
-      switch (category) {
-        case 'Large Cap': return <Building2 size={20} color="#ffffff" strokeWidth={2} />;
-        case 'Mid Cap': return <Briefcase size={20} color="#ffffff" strokeWidth={2} />;
-        case 'Debt': return <DollarSign size={20} color="#ffffff" strokeWidth={2} />;
-        case 'International': return <Globe size={20} color="#ffffff" strokeWidth={2} />;
-        default: return <BarChart3 size={20} color="#ffffff" strokeWidth={2} />;
-      }
-    };
-
-    return (
-      <TouchableOpacity key={mf.id} style={styles.mfCard} activeOpacity={0.7}>
-        <View style={styles.mfHeader}>
-          <View style={[styles.mfIcon, { backgroundColor: mf.color }]}>
-            {getCategoryIcon(mf.category)}
-          </View>
-          <View style={styles.mfInfo}>
-            <Text style={styles.mfName}>{mf.name}</Text>
-            <View style={styles.mfMeta}>
-              <Text style={styles.mfCategory}>{mf.category}</Text>
-              <View style={[styles.riskBadge, { backgroundColor: getRiskColor(mf.risk) }]}>
-                <Text style={styles.riskText}>{mf.risk}</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-        
-        <View style={styles.mfDetails}>
-          <View style={styles.mfNav}>
-            <Text style={styles.mfNavAmount}>₹{mf.nav.toFixed(2)}</Text>
-            <Text style={[
-              styles.mfNavChange,
-              { color: mf.change >= 0 ? '#10B981' : '#EF4444' }
-            ]}>
-              {mf.change >= 0 ? '+' : ''}₹{mf.change.toFixed(2)} ({mf.changePercent >= 0 ? '+' : ''}{mf.changePercent.toFixed(2)}%)
-            </Text>
-          </View>
-          <View style={styles.mfHolding}>
-            <Text style={styles.mfUnits}>{mf.units} units</Text>
-            <Text style={styles.mfValue}>₹{mf.value.toLocaleString()}</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderPerformanceChart = () => (
-    <View style={styles.performanceCard}>
-      <View style={styles.performanceHeader}>
-        <BarChart3 size={24} color="#3B82F6" strokeWidth={2} />
-        <Text style={styles.performanceTitle}>Performance</Text>
-      </View>
-      <View style={styles.performanceChart}>
-        {Array.from({ length: 7 }, (_, i) => {
-          const height = Math.random() * 60 + 20;
-          const isPositive = Math.random() > 0.5;
-          return (
-            <View key={i} style={styles.performanceBar}>
-              <View 
-                style={[
-                  styles.performanceBarFill,
-                  { 
-                    height: height,
-                    backgroundColor: isPositive ? '#10B981' : '#EF4444'
-                  }
-                ]} 
-              />
-              <Text style={styles.performanceBarLabel}>
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
-    </View>
-  );
-
   const renderContent = () => {
     switch (selectedTab) {
       case 'overview':
         return (
           <View>
             {renderPortfolioCard()}
-            {renderAllocationCard()}
-            {renderPerformanceChart()}
             <View style={styles.quickActions}>
               <Text style={styles.sectionTitle}>Quick Actions</Text>
               <View style={styles.actionButtons}>
                 <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}>
-                  <Plus size={20} color="#ffffff" strokeWidth={2} />
+                  <Icon name="plus" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>Buy Stocks</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
-                  <Zap size={20} color="#ffffff" strokeWidth={2} />
+                  <Icon name="zap" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>Start SIP</Text>
                 </TouchableOpacity>
               </View>
@@ -401,7 +238,7 @@ export default function InvestmentsScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Stock Holdings</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Plus size={20} color="#3B82F6" strokeWidth={2} />
+                <Icon name="plus" size={20} color="#3B82F6" />
               </TouchableOpacity>
             </View>
             <Text style={styles.sectionSubtitle}>
@@ -416,13 +253,46 @@ export default function InvestmentsScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Mutual Fund Holdings</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Plus size={20} color="#3B82F6" strokeWidth={2} />
+                <Icon name="plus" size={20} color="#3B82F6" />
               </TouchableOpacity>
             </View>
             <Text style={styles.sectionSubtitle}>
               Total Value: ₹{totalMFValue.toLocaleString()}
             </Text>
-            {mutualFunds.map(renderMutualFundCard)}
+            {mutualFunds.map((mf) => (
+              <TouchableOpacity key={mf.id} style={styles.mfCard} activeOpacity={0.7}>
+                <View style={styles.mfHeader}>
+                  <View style={[styles.mfIcon, { backgroundColor: mf.color }]}>
+                    <Icon name="bar-chart-2" size={20} color="#ffffff" />
+                  </View>
+                  <View style={styles.mfInfo}>
+                    <Text style={styles.mfName}>{mf.name}</Text>
+                    <View style={styles.mfMeta}>
+                      <Text style={styles.mfCategory}>{mf.category}</Text>
+                      <View style={[styles.riskBadge, { backgroundColor: mf.risk === 'Low' ? '#10B981' : mf.risk === 'Medium' ? '#F59E0B' : '#EF4444' }]}>
+                        <Text style={styles.riskText}>{mf.risk}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                
+                <View style={styles.mfDetails}>
+                  <View style={styles.mfNav}>
+                    <Text style={styles.mfNavAmount}>₹{mf.nav.toFixed(2)}</Text>
+                    <Text style={[
+                      styles.mfNavChange,
+                      { color: mf.change >= 0 ? '#10B981' : '#EF4444' }
+                    ]}>
+                      {mf.change >= 0 ? '+' : ''}₹{mf.change.toFixed(2)} ({mf.changePercent >= 0 ? '+' : ''}{mf.changePercent.toFixed(2)}%)
+                    </Text>
+                  </View>
+                  <View style={styles.mfHolding}>
+                    <Text style={styles.mfUnits}>{mf.units} units</Text>
+                    <Text style={styles.mfValue}>₹{mf.value.toLocaleString()}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
         );
       default:
@@ -432,6 +302,7 @@ export default function InvestmentsScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Investments</Text>
         <Text style={styles.subtitle}>Grow your wealth smartly</Text>
@@ -557,93 +428,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#ffffff',
     opacity: 0.7,
-  },
-  allocationCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  allocationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  allocationTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginLeft: 12,
-  },
-  allocationItems: {
-    gap: 12,
-  },
-  allocationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  allocationDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  allocationLabel: {
-    fontSize: 16,
-    color: '#64748b',
-    flex: 1,
-  },
-  allocationValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  performanceCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-  },
-  performanceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  performanceTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginLeft: 12,
-  },
-  performanceChart: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    height: 80,
-  },
-  performanceBar: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  performanceBarFill: {
-    width: 20,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  performanceBarLabel: {
-    fontSize: 10,
-    color: '#64748b',
-    fontWeight: '500',
   },
   sectionHeader: {
     flexDirection: 'row',

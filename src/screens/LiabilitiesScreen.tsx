@@ -5,10 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { TriangleAlert as AlertTriangle, Plus, Calendar, CircleCheck as CheckCircle, Clock, CreditCard, Receipt, Zap, ArrowRight } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -86,7 +86,6 @@ const mockLiabilities: Liability[] = [
 ];
 
 export default function LiabilitiesScreen() {
-  const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'unpaid' | 'paid' | 'overdue'>('all');
   const scaleValue = useSharedValue(1);
 
@@ -114,10 +113,10 @@ export default function LiabilitiesScreen() {
 
   const getLiabilityIcon = (type: string) => {
     switch (type) {
-      case 'credit_card': return <CreditCard size={20} color="#ffffff" strokeWidth={2} />;
-      case 'bill': return <Receipt size={20} color="#ffffff" strokeWidth={2} />;
-      case 'debt': return <AlertTriangle size={20} color="#ffffff" strokeWidth={2} />;
-      default: return <Zap size={20} color="#ffffff" strokeWidth={2} />;
+      case 'credit_card': return 'credit-card';
+      case 'bill': return 'file-text';
+      case 'debt': return 'alert-triangle';
+      default: return 'zap';
     }
   };
 
@@ -132,10 +131,10 @@ export default function LiabilitiesScreen() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'paid': return <CheckCircle size={16} color="#10B981" strokeWidth={2} />;
-      case 'unpaid': return <Clock size={16} color="#F59E0B" strokeWidth={2} />;
-      case 'overdue': return <AlertTriangle size={16} color="#EF4444" strokeWidth={2} />;
-      default: return <Clock size={16} color="#64748B" strokeWidth={2} />;
+      case 'paid': return 'check-circle';
+      case 'unpaid': return 'clock';
+      case 'overdue': return 'alert-triangle';
+      default: return 'clock';
     }
   };
 
@@ -176,7 +175,7 @@ export default function LiabilitiesScreen() {
           <View style={styles.summaryHeader}>
             <Text style={styles.summaryLabel}>Total Outstanding</Text>
             <View style={styles.summaryIcon}>
-              <AlertTriangle size={24} color="#ffffff" strokeWidth={2} />
+              <Icon name="alert-triangle" size={24} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.summaryAmount}>
@@ -206,11 +205,10 @@ export default function LiabilitiesScreen() {
       <TouchableOpacity 
         key={liability.id} 
         style={styles.liabilityCard} 
-        activeOpacity={0.7}
-        onPress={() => router.push(`/liability-details/${liability.id}`)}>
+        activeOpacity={0.7}>
         <View style={styles.liabilityHeader}>
           <View style={[styles.liabilityIcon, { backgroundColor: liability.color }]}>
-            {getLiabilityIcon(liability.type)}
+            <Icon name={getLiabilityIcon(liability.type)} size={20} color="#ffffff" />
           </View>
           <View style={styles.liabilityInfo}>
             <Text style={styles.liabilityName}>{liability.name}</Text>
@@ -219,8 +217,8 @@ export default function LiabilitiesScreen() {
             </Text>
           </View>
           <View style={styles.liabilityStatus}>
-            {getStatusIcon(liability.status)}
-            <ArrowRight size={16} color="#94a3b8" strokeWidth={2} />
+            <Icon name={getStatusIcon(liability.status)} size={16} color={getStatusColor(liability.status)} />
+            <Icon name="arrow-right" size={16} color="#94a3b8" />
           </View>
         </View>
 
@@ -238,7 +236,7 @@ export default function LiabilitiesScreen() {
           
           <View style={styles.liabilityMeta}>
             <View style={styles.dueDateContainer}>
-              <Calendar size={14} color="#64748b" strokeWidth={2} />
+              <Icon name="calendar" size={14} color="#64748b" />
               <Text style={styles.dueDate}>
                 Due: {dueDate.toLocaleDateString('en-IN', { 
                   day: 'numeric', 
@@ -273,6 +271,7 @@ export default function LiabilitiesScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Liabilities</Text>
         <Text style={styles.subtitle}>Track your dues and bills</Text>
@@ -290,10 +289,8 @@ export default function LiabilitiesScreen() {
           <Text style={styles.sectionTitle}>
             {selectedStatus === 'all' ? 'All Liabilities' : `${selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)} Liabilities`}
           </Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/add-liability')}>
-            <Plus size={20} color="#3B82F6" strokeWidth={2} />
+          <TouchableOpacity style={styles.addButton}>
+            <Icon name="plus" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -304,10 +301,8 @@ export default function LiabilitiesScreen() {
             <Text style={styles.emptyStateText}>
               No {selectedStatus === 'all' ? '' : selectedStatus} liabilities found
             </Text>
-            <TouchableOpacity 
-              style={styles.addLiabilityButton}
-              onPress={() => router.push('/add-liability')}>
-              <Plus size={20} color="#ffffff" strokeWidth={2} />
+            <TouchableOpacity style={styles.addLiabilityButton}>
+              <Icon name="plus" size={20} color="#ffffff" />
               <Text style={styles.addLiabilityButtonText}>Add Your First Liability</Text>
             </TouchableOpacity>
           </View>

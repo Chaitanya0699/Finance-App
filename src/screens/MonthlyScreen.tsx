@@ -7,9 +7,10 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronLeft, ChevronRight, Calendar, TrendingDown, TrendingUp, MoveHorizontal as MoreHorizontal } from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -85,18 +86,18 @@ export default function MonthlyScreen() {
       <TouchableOpacity 
         style={styles.monthNavButton}
         onPress={() => changeMonth('prev')}>
-        <ChevronLeft size={24} color="#3B82F6" strokeWidth={2} />
+        <Icon name="chevron-left" size={24} color="#3B82F6" />
       </TouchableOpacity>
       
       <Animated.View style={[styles.monthContainer, animatedSlideStyle]}>
-        <Calendar size={20} color="#3B82F6" strokeWidth={2} />
+        <Icon name="calendar" size={20} color="#3B82F6" />
         <Text style={styles.monthText}>{months[currentMonth]} 2025</Text>
       </Animated.View>
       
       <TouchableOpacity 
         style={styles.monthNavButton}
         onPress={() => changeMonth('next')}>
-        <ChevronRight size={24} color="#3B82F6" strokeWidth={2} />
+        <Icon name="chevron-right" size={24} color="#3B82F6" />
       </TouchableOpacity>
     </View>
   );
@@ -111,9 +112,9 @@ export default function MonthlyScreen() {
         <Text style={styles.summaryLabel}>Monthly Summary</Text>
         <View style={styles.balanceIndicator}>
           {monthlyBalance >= 0 ? (
-            <TrendingUp size={20} color="#ffffff" strokeWidth={2} />
+            <Icon name="trending-up" size={20} color="#ffffff" />
           ) : (
-            <TrendingDown size={20} color="#ffffff" strokeWidth={2} />
+            <Icon name="trending-down" size={20} color="#ffffff" />
           )}
         </View>
       </View>
@@ -172,15 +173,13 @@ export default function MonthlyScreen() {
           {item.type === 'income' ? '+' : '-'}₹{item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </Text>
         <TouchableOpacity style={styles.expenseMenuButton}>
-          <MoreHorizontal size={16} color="#94a3b8" strokeWidth={2} />
+          <Icon name="more-horizontal" size={16} color="#94a3b8" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
 
   const renderSpendingChart = () => {
-    const maxAmount = Math.max(...monthlyExpenses.filter(e => e.type === 'expense').map(e => e.amount));
-    
     return (
       <View style={styles.chartContainer}>
         <Text style={styles.chartTitle}>Daily Spending</Text>
@@ -211,6 +210,7 @@ export default function MonthlyScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Monthly Expenses</Text>
         <Text style={styles.subtitle}>Track your spending patterns</Text>

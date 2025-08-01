@@ -6,14 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, CreditCard, ChartPie as PieChart, Building2, TriangleAlert as AlertTriangle, Plus, Target } from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 
 // Mock data for Net Worth calculation
@@ -115,7 +115,7 @@ export default function OverviewScreen() {
           <View style={styles.netWorthHeader}>
             <Text style={styles.netWorthLabel}>Net Worth</Text>
             <View style={styles.netWorthIcon}>
-              <TrendingUp size={24} color="#ffffff" strokeWidth={2} />
+              <Icon name="trending-up" size={24} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.netWorthAmount}>
@@ -127,17 +127,17 @@ export default function OverviewScreen() {
           
           <View style={styles.netWorthBreakdown}>
             <View style={styles.netWorthItem}>
-              <Building2 size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="home" size={16} color="#ffffff" />
               <Text style={styles.netWorthItemLabel}>Assets</Text>
               <Text style={styles.netWorthItemValue}>₹{(totalAssets / 100000).toFixed(1)}L</Text>
             </View>
             <View style={styles.netWorthItem}>
-              <AlertTriangle size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="alert-triangle" size={16} color="#ffffff" />
               <Text style={styles.netWorthItemLabel}>Liabilities</Text>
               <Text style={styles.netWorthItemValue}>₹{(totalLiabilities / 1000).toFixed(0)}K</Text>
             </View>
             <View style={styles.netWorthItem}>
-              <CreditCard size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="credit-card" size={16} color="#ffffff" />
               <Text style={styles.netWorthItemLabel}>Loans</Text>
               <Text style={styles.netWorthItemValue}>₹{(totalLoans / 100000).toFixed(1)}L</Text>
             </View>
@@ -152,15 +152,15 @@ export default function OverviewScreen() {
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.netWorthActionButtons}>
         <TouchableOpacity style={[styles.netWorthActionButton, { backgroundColor: '#10B981' }]}>
-          <Building2 size={18} color="#ffffff" strokeWidth={2} />
+          <Icon name="home" size={18} color="#ffffff" />
           <Text style={styles.netWorthActionButtonText}>Add Asset</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.netWorthActionButton, { backgroundColor: '#EF4444' }]}>
-          <AlertTriangle size={18} color="#ffffff" strokeWidth={2} />
+          <Icon name="alert-triangle" size={18} color="#ffffff" />
           <Text style={styles.netWorthActionButtonText}>Add Liability</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.netWorthActionButton, { backgroundColor: '#F59E0B' }]}>
-          <CreditCard size={18} color="#ffffff" strokeWidth={2} />
+          <Icon name="credit-card" size={18} color="#ffffff" />
           <Text style={styles.netWorthActionButtonText}>Add Loan</Text>
         </TouchableOpacity>
       </View>
@@ -178,7 +178,7 @@ export default function OverviewScreen() {
           <View style={styles.balanceHeader}>
             <Text style={styles.balanceLabel}>Current Balance</Text>
             <View style={styles.trendContainer}>
-              <TrendingUp size={20} color="#ffffff" strokeWidth={2} />
+              <Icon name="trending-up" size={20} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.balanceAmount}>
@@ -186,12 +186,12 @@ export default function OverviewScreen() {
           </Text>
           <View style={styles.balanceStats}>
             <View style={styles.statItem}>
-              <ArrowUpRight size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="arrow-up-right" size={16} color="#ffffff" />
               <Text style={styles.statLabel}>Income</Text>
               <Text style={styles.statAmount}>+₹{totalIncome.toLocaleString('en-IN')}</Text>
             </View>
             <View style={styles.statItem}>
-              <ArrowDownRight size={16} color="#ffffff" strokeWidth={2} />
+              <Icon name="arrow-down-right" size={16} color="#ffffff" />
               <Text style={styles.statLabel}>Expenses</Text>
               <Text style={styles.statAmount}>-₹{totalExpenses.toLocaleString('en-IN')}</Text>
             </View>
@@ -231,7 +231,7 @@ export default function OverviewScreen() {
             styles.categoryIcon,
             { backgroundColor: categoryColors[category] || '#64748B' },
           ]}>
-          <PieChart size={20} color="#ffffff" strokeWidth={2} />
+          <Icon name="pie-chart" size={20} color="#ffffff" />
         </View>
         <View style={styles.categoryInfo}>
           <Text style={styles.categoryName}>{category}</Text>
@@ -259,11 +259,11 @@ export default function OverviewScreen() {
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.actionButtons}>
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
-          <DollarSign size={24} color="#ffffff" strokeWidth={2} />
+          <Icon name="dollar-sign" size={24} color="#ffffff" />
           <Text style={styles.actionButtonText}>Add Income</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#EF4444' }]}>
-          <CreditCard size={24} color="#ffffff" strokeWidth={2} />
+          <Icon name="credit-card" size={24} color="#ffffff" />
           <Text style={styles.actionButtonText}>Add Expense</Text>
         </TouchableOpacity>
       </View>
@@ -271,28 +271,31 @@ export default function OverviewScreen() {
   );
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Text style={styles.greeting}>Good morning! 👋</Text>
-        <Text style={styles.subtitle}>Here's your financial overview</Text>
-      </View>
-
-      {renderNetWorthCard()}
-      {renderNetWorthActions()}
-      {renderBalanceCard()}
-      {renderPeriodSelector()}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Expense Categories</Text>
-        <View style={styles.categoriesContainer}>
-          {Object.entries(expensesByCategory).map(([category, amount]) =>
-            renderCategoryCard(category, amount)
-          )}
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Good morning! 👋</Text>
+          <Text style={styles.subtitle}>Here's your financial overview</Text>
         </View>
-      </View>
 
-      {renderQuickActions()}
-    </ScrollView>
+        {renderNetWorthCard()}
+        {renderNetWorthActions()}
+        {renderBalanceCard()}
+        {renderPeriodSelector()}
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Expense Categories</Text>
+          <View style={styles.categoriesContainer}>
+            {Object.entries(expensesByCategory).map(([category, amount]) =>
+              renderCategoryCard(category, amount)
+            )}
+          </View>
+        </View>
+
+        {renderQuickActions()}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -300,6 +303,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     paddingHorizontal: 20,

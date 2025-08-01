@@ -5,10 +5,10 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { TrendingUp, Plus, Chrome as Home, Car, Coins, Building2, Briefcase, ArrowUpRight, ArrowDownRight, Calendar } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Feather';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -65,22 +65,9 @@ const mockAssets: Asset[] = [
     color: '#F59E0B',
     icon: '💰'
   },
-  {
-    id: '4',
-    name: 'Mutual Fund Portfolio',
-    type: 'investment',
-    currentValue: 1250000,
-    purchaseValue: 950000,
-    acquisitionDate: '2019-06-01',
-    lastUpdated: '2025-01-15',
-    notes: 'Diversified equity and debt funds',
-    color: '#8B5CF6',
-    icon: '📈'
-  }
 ];
 
 export default function AssetsScreen() {
-  const router = useRouter();
   const [selectedType, setSelectedType] = useState<'all' | 'property' | 'vehicle' | 'gold' | 'investment' | 'other'>('all');
   const scaleValue = useSharedValue(1);
 
@@ -112,11 +99,21 @@ export default function AssetsScreen() {
 
   const getAssetIcon = (type: string) => {
     switch (type) {
-      case 'property': return <Home size={20} color="#ffffff" strokeWidth={2} />;
-      case 'vehicle': return <Car size={20} color="#ffffff" strokeWidth={2} />;
-      case 'gold': return <Coins size={20} color="#ffffff" strokeWidth={2} />;
-      case 'investment': return <TrendingUp size={20} color="#ffffff" strokeWidth={2} />;
-      default: return <Briefcase size={20} color="#ffffff" strokeWidth={2} />;
+      case 'property': return 'home';
+      case 'vehicle': return 'truck';
+      case 'gold': return 'dollar-sign';
+      case 'investment': return 'trending-up';
+      default: return 'briefcase';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'property': return '#3B82F6';
+      case 'vehicle': return '#10B981';
+      case 'gold': return '#F59E0B';
+      case 'investment': return '#8B5CF6';
+      default: return '#64748B';
     }
   };
 
@@ -156,7 +153,7 @@ export default function AssetsScreen() {
           <View style={styles.summaryHeader}>
             <Text style={styles.summaryLabel}>Total Asset Value</Text>
             <View style={styles.summaryIcon}>
-              <TrendingUp size={24} color="#ffffff" strokeWidth={2} />
+              <Icon name="trending-up" size={24} color="#ffffff" />
             </View>
           </View>
           <Text style={styles.summaryAmount}>
@@ -199,16 +196,6 @@ export default function AssetsScreen() {
     </View>
   );
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'property': return '#3B82F6';
-      case 'vehicle': return '#10B981';
-      case 'gold': return '#F59E0B';
-      case 'investment': return '#8B5CF6';
-      default: return '#64748B';
-    }
-  };
-
   const renderAssetCard = (asset: Asset) => {
     const gainLoss = asset.currentValue - asset.purchaseValue;
     const gainLossPercent = (gainLoss / asset.purchaseValue) * 100;
@@ -217,11 +204,10 @@ export default function AssetsScreen() {
       <TouchableOpacity 
         key={asset.id} 
         style={styles.assetCard} 
-        activeOpacity={0.7}
-        onPress={() => router.push(`/asset-details/${asset.id}`)}>
+        activeOpacity={0.7}>
         <View style={styles.assetHeader}>
           <View style={[styles.assetIcon, { backgroundColor: asset.color }]}>
-            {getAssetIcon(asset.type)}
+            <Icon name={getAssetIcon(asset.type)} size={20} color="#ffffff" />
           </View>
           <View style={styles.assetInfo}>
             <Text style={styles.assetName}>{asset.name}</Text>
@@ -231,9 +217,9 @@ export default function AssetsScreen() {
           </View>
           <View style={styles.assetTrend}>
             {gainLoss >= 0 ? (
-              <ArrowUpRight size={16} color="#10B981" strokeWidth={2} />
+              <Icon name="arrow-up-right" size={16} color="#10B981" />
             ) : (
-              <ArrowDownRight size={16} color="#EF4444" strokeWidth={2} />
+              <Icon name="arrow-down-right" size={16} color="#EF4444" />
             )}
           </View>
         </View>
@@ -274,6 +260,7 @@ export default function AssetsScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8fafc" />
       <View style={styles.header}>
         <Text style={styles.title}>Assets</Text>
         <Text style={styles.subtitle}>Track your wealth portfolio</Text>
@@ -292,10 +279,8 @@ export default function AssetsScreen() {
           <Text style={styles.sectionTitle}>
             {selectedType === 'all' ? 'All Assets' : `${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Assets`}
           </Text>
-          <TouchableOpacity 
-            style={styles.addButton}
-            onPress={() => router.push('/add-asset')}>
-            <Plus size={20} color="#3B82F6" strokeWidth={2} />
+          <TouchableOpacity style={styles.addButton}>
+            <Icon name="plus" size={20} color="#3B82F6" />
           </TouchableOpacity>
         </View>
 
@@ -306,10 +291,8 @@ export default function AssetsScreen() {
             <Text style={styles.emptyStateText}>
               No {selectedType === 'all' ? '' : selectedType} assets found
             </Text>
-            <TouchableOpacity 
-              style={styles.addAssetButton}
-              onPress={() => router.push('/add-asset')}>
-              <Plus size={20} color="#ffffff" strokeWidth={2} />
+            <TouchableOpacity style={styles.addAssetButton}>
+              <Icon name="plus" size={20} color="#ffffff" />
               <Text style={styles.addAssetButtonText}>Add Your First Asset</Text>
             </TouchableOpacity>
           </View>
