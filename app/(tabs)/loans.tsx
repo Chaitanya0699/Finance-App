@@ -8,19 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  CreditCard, 
-  Plus, 
-  Calendar,
-  TrendingDown,
-  CheckCircle,
-  Clock,
-  Home,
-  Car,
-  User,
-  Building2,
-  ArrowRight
-} from 'lucide-react-native';
+import { CreditCard, Plus, Calendar, TrendingDown, CircleCheck as CheckCircle, Clock, Chrome as Home, Car, User, Building2, ArrowRight } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Animated, {
   useSharedValue,
