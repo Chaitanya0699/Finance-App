@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Wallet, Calendar, Plus, PiggyBank, TrendingUp } from 'lucide-react-native';
+import { Wallet, Calendar, Plus, PiggyBank, TrendingUp, CreditCard, Building2, AlertTriangle } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -64,6 +64,33 @@ export default function TabLayout() {
           title: 'Invest',
           tabBarIcon: ({ size, color }) => (
             <TrendingUp size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="loans"
+        options={{
+          title: 'Loans',
+          tabBarIcon: ({ size, color }) => (
+            <CreditCard size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="assets"
+        options={{
+          title: 'Assets',
+          tabBarIcon: ({ size, color }) => (
+            <Building2 size={size} color={color} strokeWidth={2} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="liabilities"
+        options={{
+          title: 'Liabilities',
+          tabBarIcon: ({ size, color }) => (
+            <AlertTriangle size={size} color={color} strokeWidth={2} />
           ),
         }}
       />
