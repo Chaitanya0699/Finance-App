@@ -14,103 +14,47 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { useFinance } from '../context/FinanceContext';
 
-interface Loan {
-  id: string;
-  name: string;
-  type: 'personal' | 'home' | 'vehicle' | 'education' | 'other';
-  totalAmount: number;
-  interestRate: number;
-  startDate: string;
-  repaymentMode: 'emi' | 'full';
-  emiAmount?: number;
-  duration?: number;
-  monthsPaid: number;
-  status: 'active' | 'closed';
-  color: string;
+interface DebtScreenProps {
+  navigation: any;
 }
 
-interface Liability {
-  id: string;
-  name: string;
-  type: 'credit_card' | 'bill' | 'debt' | 'other';
-  amount: number;
-  dueDate: string;
-  status: 'paid' | 'unpaid' | 'overdue';
-  description?: string;
-  color: string;
-}
+const getTypeColor = (type: string) => {
+  const colors: { [key: string]: string } = {
+    personal: '#3B82F6',
+    home: '#10B981',
+    vehicle: '#F59E0B',
+    education: '#8B5CF6',
+    other: '#6B7280',
+    credit_card: '#EF4444',
+    bill: '#F59E0B',
+    debt: '#8B5CF6',
+  };
+  return colors[type] || '#6B7280';
+};
 
-const mockLoans: Loan[] = [
-  {
-    id: '1',
-    name: 'Home Loan',
-    type: 'home',
-    totalAmount: 2500000,
-    interestRate: 8.5,
-    startDate: '2023-01-15',
-    repaymentMode: 'emi',
-    emiAmount: 19112,
-    duration: 240,
-    monthsPaid: 12,
-    status: 'active',
-    color: '#3B82F6'
-  },
-  {
-    id: '2',
-    name: 'Car Loan',
-    type: 'vehicle',
-    totalAmount: 800000,
-    interestRate: 9.2,
-    startDate: '2024-06-01',
-    repaymentMode: 'emi',
-    emiAmount: 17500,
-    duration: 60,
-    monthsPaid: 7,
-    status: 'active',
-    color: '#10B981'
-  },
-];
+const getTypeIcon = (type: string) => {
+  const icons: { [key: string]: string } = {
+    personal: 'user',
+    home: 'home',
+    vehicle: 'truck',
+    education: 'book',
+    other: 'file-text',
+    credit_card: 'credit-card',
+    bill: 'file-text',
+    debt: 'users',
+  };
+  return icons[type] || 'file-text';
+};
 
-const mockLiabilities: Liability[] = [
-  {
-    id: '1',
-    name: 'HDFC Credit Card',
-    type: 'credit_card',
-    amount: 45000,
-    dueDate: '2025-01-25',
-    status: 'unpaid',
-    description: 'Monthly credit card bill',
-    color: '#EF4444'
-  },
-  {
-    id: '2',
-    name: 'Electricity Bill',
-    type: 'bill',
-    amount: 3500,
-    dueDate: '2025-01-20',
-    status: 'unpaid',
-    description: 'Monthly electricity bill',
-    color: '#F59E0B'
-  },
-  {
-    id: '3',
-    name: 'Personal Debt',
-    type: 'debt',
-    amount: 25000,
-    dueDate: '2025-01-30',
-    status: 'unpaid',
-    description: 'Money borrowed from friend',
-    color: '#8B5CF6'
-  },
-];
-
-export default function DebtScreen() {
+export default function DebtScreen({ navigation }: DebtScreenProps) {
   const [selectedTab, setSelectedTab] = useState<'overview' | 'loans' | 'liabilities'>('overview');
   const scaleValue = useSharedValue(1);
+  const { state, deleteLoan, deleteLiability, updateLoan, updateLiability } = useFinance();
 
-  const activeLoans = mockLoans.filter(loan => loan.status === 'active');
-  const unpaidLiabilities = mockLiabilities.filter(l => l.status === 'unpaid');
+  const activeLoans = state.loans.filter(loan => loan.status === 'active');
+  const unpaidLiabilities = state.liabilities.filter(l => l.status === 'unpaid');
   
   const totalLoanOutstanding = activeLoans.reduce((sum, loan) => {
     if (loan.repaymentMode === 'emi' && loan.emiAmount && loan.duration) {
@@ -197,7 +141,37 @@ export default function DebtScreen() {
     </Animated.View>
   );
 
-  const renderLoan = (loan: Loan) => {
+  const handleEditLoan = (loan: any) => {
+    navigation.navigate('LoanForm', { loan });
+  };
+
+  const handleDeleteLoan = (loanId: string) => {
+    Alert.alert(
+      'Delete Loan',
+      'Are you sure you want to delete this loan?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: () => deleteLoan(loanId)
+        },
+      ]
+    );
+  };
+
+  const handlePayEMI = async (loan: any) => {
+    if (loan.duration && loan.monthsPaid < loan.duration) {
+      const updatedLoan = {
+        ...loan,
+        monthsPaid: loan.monthsPaid + 1,
+        status: loan.monthsPaid + 1 >= loan.duration ? 'closed' : 'active'
+      };
+      await updateLoan(updatedLoan);
+    }
+  };
+
+  const renderLoan = (loan: any) => {
     const progress = loan.repaymentMode === 'emi' && loan.duration 
       ? (loan.monthsPaid / loan.duration) * 100 
       : 0;
@@ -205,22 +179,29 @@ export default function DebtScreen() {
     const remainingAmount = loan.repaymentMode === 'emi' && loan.emiAmount && loan.duration
       ? loan.emiAmount * (loan.duration - loan.monthsPaid)
       : loan.totalAmount;
+    
+    const color = getTypeColor(loan.type);
 
     return (
       <TouchableOpacity 
         key={loan.id} 
-        style={styles.loanCard} 
+        style={styles.loanCard}
+        onPress={() => handleEditLoan(loan)}
         activeOpacity={0.7}>
         <View style={styles.loanHeader}>
-          <View style={[styles.loanIcon, { backgroundColor: loan.color }]}>
-            <Icon name="home" size={20} color="#ffffff" />
+          <View style={[styles.loanIcon, { backgroundColor: color }]}>
+            <Icon name={getTypeIcon(loan.type)} size={20} color="#ffffff" />
           </View>
           <View style={styles.loanInfo}>
             <Text style={styles.loanName}>{loan.name}</Text>
             <Text style={styles.loanType}>{loan.type.charAt(0).toUpperCase() + loan.type.slice(1)} Loan</Text>
           </View>
-          <View style={styles.loanStatus}>
-            <Icon name="clock" size={16} color="#F59E0B" />
+          <View style={styles.loanActions}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => handleDeleteLoan(loan.id)}>
+              <Icon name="trash-2" size={16} color="#EF4444" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -250,7 +231,7 @@ export default function DebtScreen() {
                   styles.progressBarFill,
                   { 
                     width: `${Math.min(progress, 100)}%`,
-                    backgroundColor: loan.color
+                    backgroundColor: color
                   }
                 ]} 
               />
@@ -258,23 +239,61 @@ export default function DebtScreen() {
             <Text style={styles.progressText}>{Math.round(progress)}% paid</Text>
           </View>
         )}
+        
+        {loan.repaymentMode === 'emi' && loan.status === 'active' && loan.duration && loan.monthsPaid < loan.duration && (
+          <TouchableOpacity 
+            style={[styles.payEMIButton, { backgroundColor: color }]}
+            onPress={() => handlePayEMI(loan)}>
+            <Icon name="check" size={16} color="#ffffff" />
+            <Text style={styles.payEMIText}>Mark EMI Paid</Text>
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
     );
   };
 
-  const renderLiability = (liability: Liability) => {
+  const handleEditLiability = (liability: any) => {
+    navigation.navigate('LiabilityForm', { liability });
+  };
+
+  const handleDeleteLiability = (liabilityId: string) => {
+    Alert.alert(
+      'Delete Liability',
+      'Are you sure you want to delete this liability?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: () => deleteLiability(liabilityId)
+        },
+      ]
+    );
+  };
+
+  const handleToggleLiabilityStatus = async (liability: any) => {
+    const updatedLiability = {
+      ...liability,
+      status: liability.status === 'paid' ? 'unpaid' : 'paid'
+    };
+    await updateLiability(updatedLiability);
+  };
+
+  const renderLiability = (liability: any) => {
     const dueDate = new Date(liability.dueDate);
     const today = new Date();
     const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const color = getTypeColor(liability.type);
     
     return (
       <TouchableOpacity 
         key={liability.id} 
-        style={styles.liabilityCard} 
+        style={styles.liabilityCard}
+        onPress={() => handleEditLiability(liability)}
         activeOpacity={0.7}>
         <View style={styles.liabilityHeader}>
-          <View style={[styles.liabilityIcon, { backgroundColor: liability.color }]}>
-            <Icon name="credit-card" size={20} color="#ffffff" />
+          <View style={[styles.liabilityIcon, { backgroundColor: color }]}>
+            <Icon name={getTypeIcon(liability.type)} size={20} color="#ffffff" />
           </View>
           <View style={styles.liabilityInfo}>
             <Text style={styles.liabilityName}>{liability.name}</Text>
@@ -282,8 +301,12 @@ export default function DebtScreen() {
               {liability.type.replace('_', ' ').charAt(0).toUpperCase() + liability.type.replace('_', ' ').slice(1)}
             </Text>
           </View>
-          <View style={styles.liabilityStatus}>
-            <Icon name="clock" size={16} color="#F59E0B" />
+          <View style={styles.liabilityActions}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => handleDeleteLiability(liability.id)}>
+              <Icon name="trash-2" size={16} color="#EF4444" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -292,7 +315,7 @@ export default function DebtScreen() {
             <Text style={styles.liabilityAmountValue}>
               ₹{liability.amount.toLocaleString('en-IN')}
             </Text>
-            <View style={[styles.statusBadge, { backgroundColor: liability.color }]}>
+            <View style={[styles.statusBadge, { backgroundColor: color }]}>
               <Text style={styles.statusText}>
                 {liability.status.charAt(0).toUpperCase() + liability.status.slice(1)}
               </Text>
@@ -328,6 +351,22 @@ export default function DebtScreen() {
             {liability.description}
           </Text>
         )}
+        
+        <TouchableOpacity 
+          style={[
+            styles.toggleStatusButton, 
+            { backgroundColor: liability.status === 'paid' ? '#EF4444' : '#10B981' }
+          ]}
+          onPress={() => handleToggleLiabilityStatus(liability)}>
+          <Icon 
+            name={liability.status === 'paid' ? 'x' : 'check'} 
+            size={16} 
+            color="#ffffff" 
+          />
+          <Text style={styles.toggleStatusText}>
+            Mark as {liability.status === 'paid' ? 'Unpaid' : 'Paid'}
+          </Text>
+        </TouchableOpacity>
       </TouchableOpacity>
     );
   };
@@ -341,17 +380,17 @@ export default function DebtScreen() {
             <View style={styles.quickActions}>
               <Text style={styles.sectionTitle}>Quick Actions</Text>
               <View style={styles.actionButtons}>
-                <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#EF4444' }]}>
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
+                  onPress={() => navigation.navigate('LoanForm')}>
                   <Icon name="credit-card" size={20} color="#ffffff" />
                   <Text style={styles.actionButtonText}>Add Loan</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#F59E0B' }]}>
+                <TouchableOpacity 
+                  style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
+                  onPress={() => navigation.navigate('LiabilityForm')}>
                   <Icon name="file-text" size={20} color="#ffffff" />
-                  <Text style={styles.actionButtonText}>Add Bill</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
-                  <Icon name="check" size={20} color="#ffffff" />
-                  <Text style={styles.actionButtonText}>Pay Bill</Text>
+                  <Text style={styles.actionButtonText}>Add Liability</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -363,7 +402,12 @@ export default function DebtScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Active Loans</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Icon name="plus" size={20} color="#3B82F6" />
+                <Icon 
+                  name="plus" 
+                  size={20} 
+                  color="#3B82F6" 
+                  onPress={() => navigation.navigate('LoanForm')}
+                />
               </TouchableOpacity>
             </View>
             {activeLoans.map(renderLoan)}
@@ -375,7 +419,12 @@ export default function DebtScreen() {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Pending Liabilities</Text>
               <TouchableOpacity style={styles.addButton}>
-                <Icon name="plus" size={20} color="#3B82F6" />
+                <Icon 
+                  name="plus" 
+                  size={20} 
+                  color="#3B82F6"
+                  onPress={() => navigation.navigate('LiabilityForm')}
+                />
               </TouchableOpacity>
             </View>
             {unpaidLiabilities.map(renderLiability)}
@@ -566,10 +615,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
   },
-  loanStatus: {
+  loanActions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  actionButton: {
+    padding: 8,
+    borderRadius: 8,
   },
   loanDetails: {
     marginBottom: 16,
@@ -621,6 +674,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748b',
   },
+  payEMIButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  payEMIText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginLeft: 6,
+  },
   liabilityCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -658,7 +726,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
   },
-  liabilityStatus: {
+  liabilityActions: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -709,15 +777,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
     fontStyle: 'italic',
+    marginBottom: 12,
+  },
+  toggleStatusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  toggleStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#ffffff',
+    marginLeft: 6,
   },
   quickActions: {
     marginBottom: 24,
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 12,
   },
-  actionButton: {
+  quickActionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',

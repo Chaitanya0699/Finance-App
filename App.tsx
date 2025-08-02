@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { FinanceProvider } from './src/context/FinanceContext';
 
 // Import screens
 import OverviewScreen from './src/screens/OverviewScreen';
@@ -11,6 +12,9 @@ import MonthlyScreen from './src/screens/MonthlyScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
 import WealthScreen from './src/screens/WealthScreen';
 import DebtScreen from './src/screens/DebtScreen';
+import LoanFormScreen from './src/screens/LoanFormScreen';
+import AssetFormScreen from './src/screens/AssetFormScreen';
+import LiabilityFormScreen from './src/screens/LiabilityFormScreen';
 
 // Import icons
 import Icon from 'react-native-vector-icons/Feather';
@@ -90,14 +94,19 @@ function TabNavigator() {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={TabNavigator} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <FinanceProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Main" component={TabNavigator} />
+              <Stack.Screen name="LoanForm" component={LoanFormScreen} />
+              <Stack.Screen name="AssetForm" component={AssetFormScreen} />
+              <Stack.Screen name="LiabilityForm" component={LiabilityFormScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </FinanceProvider>
   );
 }

@@ -15,26 +15,8 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-
-// Mock data for Net Worth calculation
-const mockAssets = [
-  { name: 'Property', value: 8500000 },
-  { name: 'Investments', value: 1250000 },
-  { name: 'Vehicle', value: 650000 },
-  { name: 'Gold', value: 450000 },
-];
-
-const mockLiabilities = [
-  { name: 'Credit Card', amount: 45000 },
-  { name: 'Bills', amount: 5500 },
-  { name: 'Personal Debt', amount: 25000 },
-];
-
-const mockLoans = [
-  { name: 'Home Loan', outstanding: 2300000 },
-  { name: 'Car Loan', outstanding: 520000 },
-  { name: 'Personal Loan', outstanding: 200000 },
-];
+import { useFinance } from '../context/FinanceContext';
+import NetWorthChart from '../components/NetWorthChart';
 
 const { width } = Dimensions.get('window');
 
@@ -65,15 +47,16 @@ const categoryColors: { [key: string]: string } = {
   Freelance: '#3B82F6',
 };
 
-export default function OverviewScreen() {
+interface OverviewScreenProps {
+  navigation: any;
+}
+
+export default function OverviewScreen({ navigation }: OverviewScreenProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const scaleValue = useSharedValue(1);
+  const { getNetWorth } = useFinance();
 
-  // Net Worth calculations
-  const totalAssets = mockAssets.reduce((sum, asset) => sum + asset.value, 0);
-  const totalLiabilities = mockLiabilities.reduce((sum, liability) => sum + liability.amount, 0);
-  const totalLoans = mockLoans.reduce((sum, loan) => sum + loan.outstanding, 0);
-  const netWorth = totalAssets - totalLiabilities - totalLoans;
+  const { totalAssets, totalLiabilities, totalLoans, netWorth } = getNetWorth();
 
   const totalIncome = mockExpenses
     .filter(expense => expense.type === 'income')
@@ -258,13 +241,23 @@ export default function OverviewScreen() {
     <View style={styles.quickActions}>
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#10B981' }]}>
+        <TouchableOpacity 
+          style={[styles.actionButton, { backgroundColor: '#10B981' }]}
+          onPress={() => navigation.navigate('AssetForm')}>
           <Icon name="dollar-sign" size={24} color="#ffffff" />
-          <Text style={styles.actionButtonText}>Add Income</Text>
+          <Text style={styles.actionButtonText}>Add Asset</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#EF4444' }]}>
+        <TouchableOpacity 
+          style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
+          onPress={() => navigation.navigate('LiabilityForm')}>
           <Icon name="credit-card" size={24} color="#ffffff" />
-          <Text style={styles.actionButtonText}>Add Expense</Text>
+          <Text style={styles.actionButtonText}>Add Liability</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.actionButton, { backgroundColor: '#3B82F6' }]}
+          onPress={() => navigation.navigate('LoanForm')}>
+          <Icon name="home" size={24} color="#ffffff" />
+          <Text style={styles.actionButtonText}>Add Loan</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -282,6 +275,11 @@ export default function OverviewScreen() {
         {renderNetWorthCard()}
         {renderNetWorthActions()}
         {renderBalanceCard()}
+        <NetWorthChart 
+          totalAssets={totalAssets}
+          totalLiabilities={totalLiabilities}
+          totalLoans={totalLoans}
+        />
         {renderPeriodSelector()}
 
         <View style={styles.section}>
@@ -477,14 +475,14 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
   actionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderRadius: 16,
     elevation: 3,
     shadowColor: '#000',
@@ -493,10 +491,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   actionButtonText: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: '600',
     color: '#ffffff',
     marginLeft: 8,
+    textAlign: 'center',
   },
   netWorthCard: {
     marginHorizontal: 20,
@@ -565,14 +564,14 @@ const styles = StyleSheet.create({
   },
   netWorthActionButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
   netWorthActionButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -581,9 +580,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   netWorthActionButtonText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
     color: '#ffffff',
-    marginLeft: 6,
+    marginLeft: 4,
+    textAlign: 'center',
   },
 });
