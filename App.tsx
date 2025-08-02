@@ -9,11 +9,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import OverviewScreen from './src/screens/OverviewScreen';
 import MonthlyScreen from './src/screens/MonthlyScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
-import SavingsScreen from './src/screens/SavingsScreen';
-import InvestmentsScreen from './src/screens/InvestmentsScreen';
-import LoansScreen from './src/screens/LoansScreen';
-import AssetsScreen from './src/screens/AssetsScreen';
-import LiabilitiesScreen from './src/screens/LiabilitiesScreen';
+import WealthScreen from './src/screens/WealthScreen';
+import DebtScreen from './src/screens/DebtScreen';
 
 // Import icons
 import Icon from 'react-native-vector-icons/Feather';
@@ -70,17 +67,8 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Savings"
-        component={SavingsScreen}
-        options={{
-          tabBarIcon: ({ size, color }) => (
-            <Icon name="piggy-bank" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Invest"
-        component={InvestmentsScreen}
+        name="Wealth"
+        component={WealthScreen}
         options={{
           tabBarIcon: ({ size, color }) => (
             <Icon name="trending-up" size={size} color={color} />
@@ -88,29 +76,11 @@ function TabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Loans"
-        component={LoansScreen}
+        name="Debt"
+        component={DebtScreen}
         options={{
           tabBarIcon: ({ size, color }) => (
             <Icon name="credit-card" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Assets"
-        component={AssetsScreen}
-        options={{
-          tabBarIcon: ({ size, color }) => (
-            <Icon name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Liabilities"
-        component={LiabilitiesScreen}
-        options={{
-          tabBarIcon: ({ size, color }) => (
-            <Icon name="alert-triangle" size={size} color={color} />
           ),
         }}
       />
