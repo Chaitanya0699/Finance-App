@@ -342,7 +342,7 @@ export default function PortfolioScreen() {
         return (
           <View>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Physical Assets</Text>
+              <Text style={styles.sectionTitle}>Physical Assetss</Text>
               <TouchableOpacity 
                 style={styles.addButton}
                 onPress={() => router.push('/add-asset')}>
