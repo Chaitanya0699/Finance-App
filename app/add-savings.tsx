@@ -47,7 +47,8 @@ export default function AddSavingsScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -55,14 +56,16 @@ export default function AddSavingsScreen() {
           <ArrowLeft size={24} color="#1e293b" strokeWidth={2} />
         </TouchableOpacity>
         <Text style={styles.title}>Add Savings</Text>
-        <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView 
+        style={styles.content} 
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Savings Name *</Text>
           <View style={styles.inputContainer}>
-            <PiggyBank size={20} color="#64748b" strokeWidth={2} />
+            <PiggyBank size={20} color="#64748b" strokeWidth={2} style={styles.inputIcon} />
             <TextInput
               style={styles.textInput}
               value={savingsName}
@@ -82,6 +85,7 @@ export default function AddSavingsScreen() {
                 style={[
                   styles.typeButton,
                   savingsType === type.id && styles.typeButtonSelected,
+                  { borderColor: type.color } // Use type-specific border color
                 ]}
                 onPress={() => setSavingsType(type.id)}>
                 <View style={[styles.typeIcon, { backgroundColor: type.color }]}>
@@ -94,7 +98,7 @@ export default function AddSavingsScreen() {
                 </View>
                 <Text style={[
                   styles.typeName,
-                  savingsType === type.id && styles.typeNameSelected
+                  savingsType === type.id && { color: type.color } // Use type color for selected text
                 ]}>
                   {type.name}
                 </Text>
@@ -106,7 +110,7 @@ export default function AddSavingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Current Amount *</Text>
           <View style={styles.inputContainer}>
-            <DollarSign size={20} color="#64748b" strokeWidth={2} />
+            <DollarSign size={20} color="#64748b" strokeWidth={2} style={styles.inputIcon} />
             <TextInput
               style={styles.textInput}
               value={amount}
@@ -122,7 +126,7 @@ export default function AddSavingsScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Interest Rate (%)</Text>
             <View style={styles.inputContainer}>
-              <Percent size={20} color="#64748b" strokeWidth={2} />
+              <Percent size={20} color="#64748b" strokeWidth={2} style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
                 value={interestRate}
@@ -140,7 +144,7 @@ export default function AddSavingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Target Amount</Text>
               <View style={styles.inputContainer}>
-                <Target size={20} color="#64748b" strokeWidth={2} />
+                <Target size={20} color="#64748b" strokeWidth={2} style={styles.inputIcon} />
                 <TextInput
                   style={styles.textInput}
                   value={targetAmount}
@@ -155,7 +159,7 @@ export default function AddSavingsScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Target Date</Text>
               <View style={styles.inputContainer}>
-                <Calendar size={20} color="#64748b" strokeWidth={2} />
+                <Calendar size={20} color="#64748b" strokeWidth={2} style={styles.inputIcon} />
                 <TextInput
                   style={styles.textInput}
                   value={targetDate}
@@ -170,8 +174,8 @@ export default function AddSavingsScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Notes</Text>
-          <View style={styles.inputContainer}>
-            <FileText size={20} color="#64748b" strokeWidth={2} />
+          <View style={[styles.inputContainer, styles.notesContainer]}>
+            <FileText size={20} color="#64748b" strokeWidth={2} style={[styles.inputIcon, styles.notesIcon]} />
             <TextInput
               style={[styles.textInput, styles.textArea]}
               value={notes}
@@ -179,7 +183,7 @@ export default function AddSavingsScreen() {
               placeholder="Additional details about your savings"
               placeholderTextColor="#94a3b8"
               multiline
-              numberOfLines={3}
+              numberOfLines={4}
             />
           </View>
         </View>
@@ -190,7 +194,7 @@ export default function AddSavingsScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.saveButton}>
-            <PiggyBank size={24} color="#ffffff" strokeWidth={2} />
+            <PiggyBank size={20} color="#ffffff" strokeWidth={2.5} style={styles.saveIcon} />
             <Text style={styles.saveButtonText}>Add Savings</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -200,24 +204,138 @@ export default function AddSavingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
-  backButton: { padding: 8, borderRadius: 12, backgroundColor: '#ffffff', elevation: 2 },
-  title: { fontSize: 20, fontWeight: '700', color: '#1e293b' },
-  placeholder: { width: 40 },
-  content: { flex: 1, paddingHorizontal: 20 },
-  section: { marginBottom: 24 },
-  sectionLabel: { fontSize: 16, fontWeight: '600', color: '#1e293b', marginBottom: 12 },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', borderRadius: 16, paddingHorizontal: 20, paddingVertical: 16, elevation: 2 },
-  textInput: { flex: 1, fontSize: 16, color: '#1e293b', marginLeft: 12 },
-  textArea: { minHeight: 80, textAlignVertical: 'top' },
-  typeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginHorizontal: -6 },
-  typeButton: { width: '48%', backgroundColor: '#ffffff', borderRadius: 16, padding: 16, alignItems: 'center', marginHorizontal: 6, marginBottom: 12, elevation: 2 },
-  typeButtonSelected: { backgroundColor: '#f0f9ff', borderWidth: 2, borderColor: '#3B82F6' },
-  typeIcon: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 8, position: 'relative' },
-  checkOverlay: { position: 'absolute', top: -4, right: -4, backgroundColor: '#3B82F6', borderRadius: 12, padding: 4, borderWidth: 2, borderColor: '#ffffff' },
-  typeName: { fontSize: 14, fontWeight: '600', color: '#64748b', textAlign: 'center' },
-  typeNameSelected: { color: '#3B82F6' },
-  saveButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, elevation: 4, marginBottom: 40 },
-  saveButtonText: { fontSize: 18, fontWeight: '700', color: '#ffffff', marginLeft: 8 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#f8fafc' 
+  },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingHorizontal: 20, 
+    paddingTop: 60, 
+    paddingBottom: 20,
+    position: 'relative'
+  },
+  backButton: { 
+    position: 'absolute',
+    left: 20,
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+    elevation: 2
+  },
+  title: { 
+    fontSize: 20, 
+    fontWeight: '700', 
+    color: '#1e293b',
+    textAlign: 'center'
+  },
+  content: { 
+    flex: 1, 
+    paddingHorizontal: 20 
+  },
+  scrollContent: {
+    paddingBottom: 40
+  },
+  section: { 
+    marginBottom: 24 
+  },
+  sectionLabel: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    color: '#1e293b', 
+    marginBottom: 12 
+  },
+  inputContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    paddingHorizontal: 16, 
+    paddingVertical: 14,
+    elevation: 2 
+  },
+  inputIcon: {
+    marginRight: 12
+  },
+  textInput: { 
+    flex: 1, 
+    fontSize: 16, 
+    color: '#1e293b',
+    paddingVertical: 2,
+    includeFontPadding: false
+  },
+  textArea: { 
+    minHeight: 100, 
+    textAlignVertical: 'top',
+    paddingTop: 8
+  },
+  notesContainer: {
+    alignItems: 'flex-start'
+  },
+  notesIcon: {
+    marginTop: 8
+  },
+  typeGrid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between',
+    gap: 12
+  },
+  typeButton: { 
+    width: '48%', 
+    backgroundColor: '#ffffff', 
+    borderRadius: 16, 
+    padding: 16, 
+    alignItems: 'center', 
+    elevation: 2,
+    borderWidth: 2,
+    borderColor: 'transparent'
+  },
+  typeButtonSelected: { 
+    backgroundColor: '#ECFDF5' // Light green background for selected
+  },
+  typeIcon: { 
+    width: 48, 
+    height: 48, 
+    borderRadius: 16, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 8, 
+    position: 'relative' 
+  },
+  checkOverlay: { 
+    position: 'absolute', 
+    top: -4, 
+    right: -4, 
+    backgroundColor: '#3B82F6', 
+    borderRadius: 12, 
+    padding: 4, 
+    borderWidth: 2, 
+    borderColor: '#ffffff' 
+  },
+  typeName: { 
+    fontSize: 14, 
+    fontWeight: '600', 
+    color: '#64748b', 
+    textAlign: 'center' 
+  },
+  saveButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    paddingVertical: 16, 
+    borderRadius: 16, 
+    elevation: 4, 
+    marginTop: 8
+  },
+  saveIcon: {
+    marginRight: 8
+  },
+  saveButtonText: { 
+    fontSize: 18, 
+    fontWeight: '700', 
+    color: '#ffffff' 
+  },
 });
