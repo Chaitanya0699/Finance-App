@@ -1,9 +1,30 @@
 import { Tabs, useRouter } from 'expo-router';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Wallet, Calendar, PiggyBank, TrendingUp, TriangleAlert as AlertTriangle, User } from 'lucide-react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import { useEffect } from 'react';
 
 export default function TabLayout() {
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Tabs
@@ -119,6 +140,17 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+  },
+  loadingText: {
+    fontSize: 16,
     color: '#64748b',
     fontWeight: '500',
   },

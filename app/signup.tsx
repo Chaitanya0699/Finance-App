@@ -13,9 +13,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User, Phone } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  const { signUp, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,7 +27,6 @@ export default function SignUpScreen() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -49,17 +50,15 @@ export default function SignUpScreen() {
       return;
     }
 
-    setIsLoading(true);
+    const { user, error } = await signUp(email, password, name);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert(
-        'Success',
-        'Account created successfully!',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-      );
-    }, 1500);
+    if (error) {
+      Alert.alert('Sign Up Failed', error);
+    } else if (user) {
+      Alert.alert('Success', 'Account created successfully!', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)') }
+      ]);
+    }
   };
 
   const handleLogin = () => {
@@ -170,14 +169,14 @@ export default function SignUpScreen() {
           </View>
 
           <TouchableOpacity 
-            style={[styles.signupButton, isLoading && styles.signupButtonDisabled]}
+            style={[styles.signupButton, loading && styles.signupButtonDisabled]}
             onPress={handleSignUp}
-            disabled={isLoading}>
+            disabled={loading}>
             <LinearGradient
               colors={['#10B981', '#059669']}
               style={styles.signupButtonGradient}>
               <Text style={styles.signupButtonText}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

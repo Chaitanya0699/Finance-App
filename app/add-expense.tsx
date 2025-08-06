@@ -23,6 +23,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { useExpenses } from '../hooks/useFirebaseData';
 
 const categories = [
   { id: 'food', name: 'Food & Dining', icon: '🍽️', color: '#FF6B6B' },
@@ -45,6 +46,7 @@ const incomeCategories = [
 
 export default function AddExpenseScreen() {
   const router = useRouter();
+  const { addExpense } = useExpenses();
   const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense');
   const [amount, setAmount] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -68,24 +70,36 @@ export default function AddExpenseScreen() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!amount || !selectedCategory) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      'Success',
-      `${transactionType === 'expense' ? 'Expense' : 'Income'} of ₹${amount} added successfully!`,
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            router.replace('/');
+    try {
+      await addExpense({
+        category: selectedCategory,
+        amount: parseFloat(amount),
+        description: description || undefined,
+        date,
+        type: transactionType,
+      });
+      
+      Alert.alert(
+        'Success',
+        `${transactionType === 'expense' ? 'Expense' : 'Income'} of ₹${amount} added successfully!`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              router.replace('/(tabs)');
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (

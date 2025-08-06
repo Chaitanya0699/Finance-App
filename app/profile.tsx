@@ -10,17 +10,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, User, Settings, Bell, Shield, CircleHelp as HelpCircle, LogOut, CreditCard as Edit3, Mail, Phone, MapPin } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const [user] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+91 98765 43210',
-    location: 'Mumbai, India',
-    joinDate: '2024-01-15',
-    isLoggedIn: true
-  });
+  const { user, signOut } = useAuth();
 
   const handleLogout = () => {
     Alert.alert(
@@ -31,7 +25,12 @@ export default function ProfileScreen() {
         { 
           text: 'Logout', 
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
+            const { error } = await signOut();
+            if (error) {
+              Alert.alert('Error', error);
+              return;
+            }
             // Handle logout logic
             router.replace('/login');
           }
@@ -44,7 +43,7 @@ export default function ProfileScreen() {
     router.push('/login');
   };
 
-  if (!user.isLoggedIn) {
+  if (!user) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -95,10 +94,10 @@ export default function ProfileScreen() {
               <User size={32} color="#ffffff" strokeWidth={2} />
             </View>
           </View>
-          <Text style={styles.userName}>{user.name}</Text>
+          <Text style={styles.userName}>{user.displayName || 'User'}</Text>
           <Text style={styles.userEmail}>{user.email}</Text>
           <Text style={styles.memberSince}>
-            Member since {new Date(user.joinDate).toLocaleDateString('en-IN', { 
+            Member since {new Date(user.metadata.creationTime || '').toLocaleDateString('en-IN', { 
               month: 'long', 
               year: 'numeric' 
             })}
@@ -120,7 +119,7 @@ export default function ProfileScreen() {
             <Phone size={20} color="#64748b" strokeWidth={2} />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Phone</Text>
-              <Text style={styles.infoValue}>{user.phone}</Text>
+              <Text style={styles.infoValue}>{user.phoneNumber || 'Not provided'}</Text>
             </View>
           </View>
 
@@ -128,7 +127,7 @@ export default function ProfileScreen() {
             <MapPin size={20} color="#64748b" strokeWidth={2} />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Location</Text>
-              <Text style={styles.infoValue}>{user.location}</Text>
+              <Text style={styles.infoValue}>Mumbai, India</Text>
             </View>
           </View>
         </View>

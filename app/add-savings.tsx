@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, PiggyBank, Target, Coins, Building2, CreditCard, Calendar, FileText, DollarSign, Check, Percent } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useSavingsGoals } from '../hooks/useFirebaseData';
 
 const savingsTypes = [
   { id: 'savings', name: 'Savings Account', icon: <Coins size={24} color="#ffffff" />, color: '#10B981' },
@@ -23,6 +24,7 @@ const savingsTypes = [
 
 export default function AddSavingsScreen() {
   const router = useRouter();
+  const { addGoal } = useSavingsGoals();
   const [savingsName, setSavingsName] = useState('');
   const [savingsType, setSavingsType] = useState('');
   const [amount, setAmount] = useState('');
@@ -31,17 +33,37 @@ export default function AddSavingsScreen() {
   const [targetDate, setTargetDate] = useState('');
   const [notes, setNotes] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!savingsName || !savingsType || !amount) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      'Success',
-      `Savings "${savingsName}" added successfully!`,
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
+    try {
+      if (savingsType === 'goal') {
+        if (!targetAmount || !targetDate) {
+          Alert.alert('Error', 'Please fill in target amount and date for goals');
+          return;
+        }
+        
+        await addGoal({
+          name: savingsName,
+          targetAmount: parseFloat(targetAmount),
+          currentAmount: parseFloat(amount),
+          deadline: targetDate,
+          category: 'savings',
+          description: notes || undefined,
+        });
+      }
+      
+      Alert.alert(
+        'Success',
+        `Savings "${savingsName}" added successfully!`,
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (

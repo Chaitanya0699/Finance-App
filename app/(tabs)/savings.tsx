@@ -25,6 +25,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { useSavingsGoals } from '../../hooks/useFirebaseData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -48,48 +50,6 @@ interface SavingsAccount {
   color: string;
 }
 
-const savingsGoals: SavingsGoal[] = [
-  {
-    id: '1',
-    name: 'Emergency Fund',
-    targetAmount: 10000,
-    currentAmount: 6500,
-    deadline: '2025-12-31',
-    category: 'Emergency',
-    color: '#EF4444',
-    icon: '🚨'
-  },
-  {
-    id: '2',
-    name: 'Vacation to Europe',
-    targetAmount: 5000,
-    currentAmount: 2800,
-    deadline: '2025-08-15',
-    category: 'Travel',
-    color: '#3B82F6',
-    icon: '✈️'
-  },
-  {
-    id: '3',
-    name: 'New Car',
-    targetAmount: 25000,
-    currentAmount: 8500,
-    deadline: '2026-06-30',
-    category: 'Vehicle',
-    color: '#10B981',
-    icon: '🚗'
-  },
-  {
-    id: '4',
-    name: 'Home Down Payment',
-    targetAmount: 50000,
-    currentAmount: 15000,
-    deadline: '2027-01-01',
-    category: 'Real Estate',
-    color: '#F59E0B',
-    icon: '🏠'
-  }
-];
 
 const savingsAccounts: SavingsAccount[] = [
   {
@@ -120,13 +80,23 @@ const savingsAccounts: SavingsAccount[] = [
 
 export default function SavingsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { goals, loading } = useSavingsGoals();
   const [selectedTab, setSelectedTab] = useState<'overview' | 'goals' | 'accounts'>('overview');
   const scaleValue = useSharedValue(1);
 
+  if (!user) {
+    return null;
+  }
+
   const totalSavings = savingsAccounts.reduce((sum, account) => sum + account.balance, 0);
-  const totalGoalsTarget = savingsGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
-  const totalGoalsCurrent = savingsGoals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+  const totalGoalsTarget = goals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+  const totalGoalsCurrent = goals.reduce((sum, goal) => sum + goal.currentAmount, 0);
   const goalsProgress = (totalGoalsCurrent / totalGoalsTarget) * 100;
+
+  if (loading) {
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
 
   const animatedCardStyle = useAnimatedStyle(() => {
     return {
@@ -194,15 +164,24 @@ export default function SavingsScreen() {
     </Animated.View>
   );
 
-  const renderGoalCard = (goal: SavingsGoal) => {
+  const getGoalIcon = (category: string) => {
+    const icons: { [key: string]: string } = {
+      emergency: '🚨', travel: '✈️', vehicle: '🚗', home: '🏠',
+      education: '🎓', wedding: '💒', gadgets: '📱', other: '🎯'
+    };
+    return icons[category] || '🎯';
+  };
+
+  const renderGoalCard = (goal: any) => {
     const progress = (goal.currentAmount / goal.targetAmount) * 100;
     const remaining = goal.targetAmount - goal.currentAmount;
+    const color = '#3B82F6'; // Default color
     
     return (
       <TouchableOpacity key={goal.id} style={styles.goalCard} activeOpacity={0.7}>
         <View style={styles.goalHeader}>
-          <View style={[styles.goalIcon, { backgroundColor: goal.color }]}>
-            <Text style={styles.goalEmoji}>{goal.icon}</Text>
+          <View style={[styles.goalIcon, { backgroundColor: color }]}>
+            <Text style={styles.goalEmoji}>{getGoalIcon(goal.category)}</Text>
           </View>
           <View style={styles.goalInfo}>
             <Text style={styles.goalName}>{goal.name}</Text>
@@ -227,7 +206,7 @@ export default function SavingsScreen() {
             <View 
               style={[
                 styles.progressBarFill,
-                { width: `${Math.min(progress, 100)}%`, backgroundColor: goal.color }
+                { width: `${Math.min(progress, 100)}%`, backgroundColor: color }
               ]} 
             />
           </View>
@@ -364,7 +343,7 @@ export default function SavingsScreen() {
                 <Plus size={20} color="#3B82F6" strokeWidth={2} />
               </TouchableOpacity>
             </View>
-            {savingsGoals.map(renderGoalCard)}
+            {goals.map(renderGoalCard)}
           </View>
         );
       case 'accounts':

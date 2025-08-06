@@ -24,46 +24,41 @@ import {
   ChartPie as PieChart,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAssets } from '../../hooks/useFirebaseData';
+import { useAuth } from '../../contexts/AuthContext';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
 
-// Mock data for investments
-const mockStocks = [
-  { id: '1', symbol: 'AAPL', name: 'Apple Inc.', price: 185.25, change: 2.45, changePercent: 1.34, shares: 25, value: 4631.25, color: '#3B82F6' },
-  { id: '2', symbol: 'GOOGL', name: 'Alphabet Inc.', price: 142.80, change: -1.20, changePercent: -0.83, shares: 15, value: 2142.00, color: '#10B981' },
-  { id: '3', symbol: 'MSFT', name: 'Microsoft Corp.', price: 378.90, change: 4.15, changePercent: 1.11, shares: 12, value: 4546.80, color: '#8B5CF6' },
-];
-
-const mockMutualFunds = [
-  { id: '1', name: 'Large Cap Growth Fund', nav: 45.67, change: 0.23, changePercent: 0.51, units: 150, value: 6850.50, category: 'Large Cap', risk: 'Medium', color: '#3B82F6' },
-  { id: '2', name: 'Mid Cap Value Fund', nav: 32.18, change: -0.15, changePercent: -0.46, units: 200, value: 6436.00, category: 'Mid Cap', risk: 'High', color: '#F59E0B' },
-];
-
-// Mock data for assets
-const mockAssets = [
-  { id: '1', name: 'Apartment - Mumbai', type: 'property', currentValue: 8500000, purchaseValue: 6500000, acquisitionDate: '2020-03-15', color: '#3B82F6' },
-  { id: '2', name: 'Honda City', type: 'vehicle', currentValue: 650000, purchaseValue: 1200000, acquisitionDate: '2021-08-20', color: '#10B981' },
-  { id: '3', name: 'Gold Jewelry', type: 'gold', currentValue: 450000, purchaseValue: 380000, acquisitionDate: '2022-11-05', color: '#F59E0B' },
-];
 
 export default function PortfolioScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { assets, loading } = useAssets();
   const [selectedTab, setSelectedTab] = useState<'overview' | 'stocks' | 'mutual_funds' | 'assets'>('overview');
   const scaleValue = useSharedValue(1);
 
-  const totalStocksValue = mockStocks.reduce((sum, stock) => sum + stock.value, 0);
-  const totalMFValue = mockMutualFunds.reduce((sum, mf) => sum + mf.value, 0);
-  const totalAssetsValue = mockAssets.reduce((sum, asset) => sum + asset.currentValue, 0);
-  const totalPortfolioValue = totalStocksValue + totalMFValue + totalAssetsValue;
-  
-  const totalDayChange = mockStocks.reduce((sum, stock) => sum + (stock.change * stock.shares), 0) +
-                        mockMutualFunds.reduce((sum, mf) => sum + (mf.change * mf.units), 0);
-  
-  const totalDayChangePercent = (totalDayChange / (totalStocksValue + totalMFValue)) * 100;
+  if (!user) {
+    return null;
+  }
 
+  const stockAssets = assets.filter(asset => asset.type === 'investment');
+  const physicalAssets = assets.filter(asset => asset.type !== 'investment');
+  
+  const totalStocksValue = stockAssets.reduce((sum, asset) => sum + asset.currentValue, 0);
+  const totalAssetsValue = physicalAssets.reduce((sum, asset) => sum + asset.currentValue, 0);
+  const totalPortfolioValue = totalStocksValue + totalAssetsValue;
+  
+  // Calculate day change (mock for now)
+  const totalDayChange = totalPortfolioValue * 0.01; // 1% mock change
+  
+  const totalDayChangePercent = (totalDayChange / totalPortfolioValue) * 100;
+
+  if (loading) {
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
   const animatedCardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scaleValue.value }],
   }));
@@ -155,39 +150,39 @@ export default function PortfolioScreen() {
           <View style={[styles.allocationDot, { backgroundColor: '#3B82F6' }]} />
           <Text style={styles.allocationLabel}>Stocks</Text>
           <Text style={styles.allocationValue}>
-            ₹{totalStocksValue.toLocaleString('en-IN')} ({((totalStocksValue / totalPortfolioValue) * 100).toFixed(1)}%)
+            ₹{totalStocksValue.toLocaleString('en-IN')} ({totalPortfolioValue > 0 ? ((totalStocksValue / totalPortfolioValue) * 100).toFixed(1) : 0}%)
           </Text>
         </View>
         <View style={styles.allocationItem}>
           <View style={[styles.allocationDot, { backgroundColor: '#10B981' }]} />
-          <Text style={styles.allocationLabel}>Mutual Funds</Text>
+          <Text style={styles.allocationLabel}>Investments</Text>
           <Text style={styles.allocationValue}>
-            ₹{totalMFValue.toLocaleString('en-IN')} ({((totalMFValue / totalPortfolioValue) * 100).toFixed(1)}%)
+            ₹{totalStocksValue.toLocaleString('en-IN')} ({totalPortfolioValue > 0 ? ((totalStocksValue / totalPortfolioValue) * 100).toFixed(1) : 0}%)
           </Text>
         </View>
         <View style={styles.allocationItem}>
           <View style={[styles.allocationDot, { backgroundColor: '#F59E0B' }]} />
           <Text style={styles.allocationLabel}>Assets</Text>
           <Text style={styles.allocationValue}>
-            ₹{totalAssetsValue.toLocaleString('en-IN')} ({((totalAssetsValue / totalPortfolioValue) * 100).toFixed(1)}%)
+            ₹{totalAssetsValue.toLocaleString('en-IN')} ({totalPortfolioValue > 0 ? ((totalAssetsValue / totalPortfolioValue) * 100).toFixed(1) : 0}%)
           </Text>
         </View>
       </View>
     </View>
   );
 
-  const renderStockCard = (stock: any) => (
-    <TouchableOpacity key={stock.id} style={styles.itemCard} activeOpacity={0.7}>
+  const renderAssetCard = (asset: any) => (
+    <TouchableOpacity key={asset.id} style={styles.itemCard} activeOpacity={0.7}>
       <View style={styles.itemHeader}>
-        <View style={[styles.itemIcon, { backgroundColor: stock.color }]}>
+        <View style={[styles.itemIcon, { backgroundColor: '#3B82F6' }]}>
           <Building2 size={20} color="#ffffff" strokeWidth={2} />
         </View>
         <View style={styles.itemInfo}>
-          <Text style={styles.itemName}>{stock.symbol}</Text>
-          <Text style={styles.itemSubtitle}>{stock.name}</Text>
+          <Text style={styles.itemName}>{asset.name}</Text>
+          <Text style={styles.itemSubtitle}>{asset.type}</Text>
         </View>
         <View style={styles.itemTrend}>
-          {stock.change >= 0 ? (
+          {asset.currentValue >= asset.purchaseValue ? (
             <ArrowUpRight size={16} color="#10B981" strokeWidth={2} />
           ) : (
             <ArrowDownRight size={16} color="#EF4444" strokeWidth={2} />
@@ -195,9 +190,10 @@ export default function PortfolioScreen() {
         </View>
       </View>
       <View style={styles.itemDetails}>
-        <Text style={styles.itemValue}>₹{stock.value.toLocaleString('en-IN')}</Text>
-        <Text style={[styles.itemChange, { color: stock.change >= 0 ? '#10B981' : '#EF4444' }]}>
-          {stock.change >= 0 ? '+' : ''}₹{stock.change.toFixed(2)} ({stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+        <Text style={styles.itemValue}>₹{asset.currentValue.toLocaleString('en-IN')}</Text>
+        <Text style={[styles.itemChange, { color: asset.currentValue >= asset.purchaseValue ? '#10B981' : '#EF4444' }]}>
+          {asset.currentValue >= asset.purchaseValue ? '+' : ''}₹{Math.abs(asset.currentValue - asset.purchaseValue).toFixed(2)} 
+          ({asset.currentValue >= asset.purchaseValue ? '+' : ''}{(((asset.currentValue - asset.purchaseValue) / asset.purchaseValue) * 100).toFixed(2)}%)
         </Text>
       </View>
     </TouchableOpacity>
@@ -318,7 +314,7 @@ export default function PortfolioScreen() {
             <Text style={styles.sectionSubtitle}>
               Total Value: ₹{totalStocksValue.toLocaleString('en-IN')}
             </Text>
-            {mockStocks.map(renderStockCard)}
+            {stockAssets.map(renderAssetCard)}
           </View>
         );
       case 'mutual_funds':
@@ -333,9 +329,9 @@ export default function PortfolioScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.sectionSubtitle}>
-              Total Value: ₹{totalMFValue.toLocaleString('en-IN')}
+              Total Value: ₹{totalStocksValue.toLocaleString('en-IN')}
             </Text>
-            {mockMutualFunds.map(renderMutualFundCard)}
+            {stockAssets.map(renderAssetCard)}
           </View>
         );
       case 'assets':
@@ -352,7 +348,7 @@ export default function PortfolioScreen() {
             <Text style={styles.sectionSubtitle}>
               Total Value: ₹{totalAssetsValue.toLocaleString('en-IN')}
             </Text>
-            {mockAssets.map(renderAssetCard)}
+            {physicalAssets.map(renderAssetCard)}
           </View>
         );
       default:

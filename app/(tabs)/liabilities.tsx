@@ -27,32 +27,31 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
+import { useLiabilities, useLoans } from '../../hooks/useFirebaseData';
+import { useAuth } from '../../contexts/AuthContext';
 
-// Mock data for loans
-const mockLoans = [
-  { id: '1', name: 'Home Loan', type: 'home', outstanding: 2300000, emi: 19112, duration: 240, monthsPaid: 12, color: '#3B82F6' },
-  { id: '2', name: 'Car Loan', type: 'vehicle', outstanding: 520000, emi: 17500, duration: 60, monthsPaid: 7, color: '#10B981' },
-  { id: '3', name: 'Personal Loan', type: 'personal', outstanding: 200000, emi: 8500, duration: 36, monthsPaid: 5, color: '#F59E0B' },
-];
-
-// Mock data for liabilities
-const mockLiabilities = [
-  { id: '1', name: 'HDFC Credit Card', type: 'credit_card', amount: 45000, dueDate: '2025-01-25', status: 'unpaid', color: '#EF4444' },
-  { id: '2', name: 'Electricity Bill', type: 'bill', amount: 3500, dueDate: '2025-01-20', status: 'unpaid', color: '#F59E0B' },
-  { id: '3', name: 'Internet Bill', type: 'bill', amount: 1200, dueDate: '2025-01-15', status: 'paid', color: '#10B981' },
-  { id: '4', name: 'Personal Debt', type: 'debt', amount: 25000, dueDate: '2025-01-30', status: 'unpaid', color: '#8B5CF6' },
-];
 
 export default function LiabilitiesScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { liabilities, loading: liabilitiesLoading } = useLiabilities();
+  const { loans, loading: loansLoading } = useLoans();
   const [selectedTab, setSelectedTab] = useState<'overview' | 'loans' | 'liabilities'>('overview');
   const scaleValue = useSharedValue(1);
 
-  const totalLoans = mockLoans.reduce((sum, loan) => sum + loan.outstanding, 0);
-  const totalEMI = mockLoans.reduce((sum, loan) => sum + loan.emi, 0);
-  const totalLiabilities = mockLiabilities.reduce((sum, liability) => sum + liability.amount, 0);
-  const unpaidLiabilities = mockLiabilities.filter(l => l.status === 'unpaid').reduce((sum, l) => sum + l.amount, 0);
-  const totalDebt = totalLoans + totalLiabilities;
+  if (!user) {
+    return null;
+  }
+
+  const totalLoans = loans.reduce((sum, loan) => sum + loan.totalAmount, 0);
+  const totalEMI = loans.reduce((sum, loan) => sum + (loan.emiAmount || 0), 0);
+  const totalLiabilitiesAmount = liabilities.reduce((sum, liability) => sum + liability.amount, 0);
+  const unpaidLiabilities = liabilities.filter(l => l.status === 'unpaid').reduce((sum, l) => sum + l.amount, 0);
+  const totalDebt = totalLoans + totalLiabilitiesAmount;
+
+  if (liabilitiesLoading || loansLoading) {
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
 
   const animatedCardStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scaleValue.value }],
@@ -259,7 +258,7 @@ export default function LiabilitiesScreen() {
             <Text style={styles.sectionSubtitle}>
               Total Outstanding: ₹{totalLoans.toLocaleString('en-IN')}
             </Text>
-            {mockLoans.map(renderLoanCard)}
+            {loans.map(renderLoanCard)}
           </View>
         );
       case 'liabilities':
@@ -274,9 +273,9 @@ export default function LiabilitiesScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.sectionSubtitle}>
-              Total Amount: ₹{totalLiabilities.toLocaleString('en-IN')}
+              Total Amount: ₹{totalLiabilitiesAmount.toLocaleString('en-IN')}
             </Text>
-            {mockLiabilities.map(renderLiabilityCard)}
+            {liabilities.map(renderLiabilityCard)}
           </View>
         );
       default:

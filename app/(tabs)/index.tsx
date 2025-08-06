@@ -25,25 +25,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
-
-const mockAssets = [
-  { name: 'Property', value: 8500000 },
-  { name: 'Investments', value: 1250000 },
-  { name: 'Vehicle', value: 650000 },
-  { name: 'Gold', value: 450000 },
-];
-
-const mockLiabilities = [
-  { name: 'Credit Card', amount: 45000 },
-  { name: 'Bills', amount: 5500 },
-  { name: 'Personal Debt', amount: 25000 },
-];
-
-const mockLoans = [
-  { name: 'Home Loan', outstanding: 2300000 },
-  { name: 'Car Loan', outstanding: 520000 },
-  { name: 'Personal Loan', outstanding: 200000 },
-];
+import { usePortfolioSummary, useExpenses } from '../../hooks/useFirebaseData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -76,25 +59,31 @@ const categoryColors: { [key: string]: string } = {
 
 export default function IndexScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const { summary, loading: summaryLoading } = usePortfolioSummary();
+  const { expenses, loading: expensesLoading } = useExpenses();
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const scaleValue = useSharedValue(1);
 
-  const totalAssets = mockAssets.reduce((sum, asset) => sum + asset.value, 0);
-  const totalLiabilities = mockLiabilities.reduce((sum, liability) => sum + liability.amount, 0);
-  const totalLoans = mockLoans.reduce((sum, loan) => sum + loan.outstanding, 0);
-  const netWorth = totalAssets - totalLiabilities - totalLoans;
+  if (!user) {
+    return null;
+  }
 
-  const totalIncome = mockExpenses
+  const totalAssets = summary?.totalAssets || 0;
+  const totalLiabilities = summary?.totalLiabilities || 0;
+  const netWorth = summary?.netWorth || 0;
+
+  const totalIncome = expenses
     .filter(expense => expense.type === 'income')
     .reduce((sum, expense) => sum + expense.amount, 0);
 
-  const totalExpenses = mockExpenses
+  const totalExpensesAmount = expenses
     .filter(expense => expense.type === 'expense')
     .reduce((sum, expense) => sum + expense.amount, 0);
 
-  const balance = totalIncome - totalExpenses;
+  const balance = totalIncome - totalExpensesAmount;
 
-  const expensesByCategory = mockExpenses
+  const expensesByCategory = expenses
     .filter(expense => expense.type === 'expense')
     .reduce((acc, expense) => {
       acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
@@ -112,6 +101,10 @@ export default function IndexScreen() {
       scaleValue.value = withSpring(1);
     });
   };
+
+  if (summaryLoading || expensesLoading) {
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
 
   /** ===============================
    *   NET WORTH CARD
@@ -149,8 +142,8 @@ export default function IndexScreen() {
             </View>
             <View style={styles.netWorthItem}>
               <CreditCard size={16} color="#ffffff" strokeWidth={2} />
-              <Text style={styles.netWorthItemLabel}>Loans</Text>
-              <Text style={styles.netWorthItemValue}>₹{(totalLoans / 100000).toFixed(1)}L</Text>
+              <Text style={styles.netWorthItemLabel}>Debt</Text>
+              <Text style={styles.netWorthItemValue}>₹{(totalLiabilities / 100000).toFixed(1)}L</Text>
             </View>
           </View>
         </LinearGradient>
@@ -247,7 +240,7 @@ export default function IndexScreen() {
             <View style={styles.statItem}>
               <ArrowDownRight size={16} color="#ffffff" strokeWidth={2} />
               <Text style={styles.statLabel}>Expenses</Text>
-              <Text style={styles.statAmount}>-₹{totalExpenses.toLocaleString('en-IN')}</Text>
+              <Text style={styles.statAmount}>-₹{totalExpensesAmount.toLocaleString('en-IN')}</Text>
             </View>
           </View>
         </LinearGradient>

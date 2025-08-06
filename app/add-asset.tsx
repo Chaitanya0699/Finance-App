@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Building2, Car, Coins, Chrome as Home, Calendar, FileText, DollarSign, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAssets } from '../hooks/useFirebaseData';
 
 const assetTypes = [
   { id: 'property', name: 'Property', icon: <Home size={24} color="#ffffff" />, color: '#3B82F6' },
@@ -23,6 +24,7 @@ const assetTypes = [
 
 export default function AddAssetScreen() {
   const router = useRouter();
+  const { addAsset } = useAssets();
   const [assetName, setAssetName] = useState('');
   const [assetType, setAssetType] = useState('');
   const [currentValue, setCurrentValue] = useState('');
@@ -30,17 +32,30 @@ export default function AddAssetScreen() {
   const [acquisitionDate, setAcquisitionDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!assetName || !assetType || !currentValue || !purchaseValue) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      'Success',
-      `Asset "${assetName}" added successfully!`,
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
+    try {
+      await addAsset({
+        name: assetName,
+        type: assetType as any,
+        currentValue: parseFloat(currentValue),
+        purchaseValue: parseFloat(purchaseValue),
+        acquisitionDate,
+        notes: notes || undefined,
+      });
+      
+      Alert.alert(
+        'Success',
+        `Asset "${assetName}" added successfully!`,
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (

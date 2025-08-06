@@ -12,13 +12,14 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Mail, Lock, Eye, EyeOff, User } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { signIn, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -26,17 +27,13 @@ export default function LoginScreen() {
       return;
     }
 
-    setIsLoading(true);
+    const { user, error } = await signIn(email, password);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      Alert.alert(
-        'Success',
-        'Login successful!',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
-      );
-    }, 1500);
+    if (error) {
+      Alert.alert('Login Failed', error);
+    } else if (user) {
+      router.replace('/(tabs)');
+    }
   };
 
   const handleSignUp = () => {
@@ -107,14 +104,14 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
-            disabled={isLoading}>
+            disabled={loading}>
             <LinearGradient
               colors={['#3B82F6', '#2563EB']}
               style={styles.loginButtonGradient}>
               <Text style={styles.loginButtonText}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Signing In...' : 'Sign In'}
               </Text>
             </LinearGradient>
           </TouchableOpacity>

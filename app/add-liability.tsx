@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, TriangleAlert as AlertTriangle, CreditCard, Receipt, Zap, Calendar, FileText, DollarSign, Check } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useLiabilities } from '../hooks/useFirebaseData';
 
 const liabilityTypes = [
   { id: 'credit_card', name: 'Credit Card', icon: <CreditCard size={24} color="#ffffff" />, color: '#EF4444' },
@@ -23,23 +24,37 @@ const liabilityTypes = [
 
 export default function AddLiabilityScreen() {
   const router = useRouter();
+  const { addLiability } = useLiabilities();
   const [liabilityName, setLiabilityName] = useState('');
   const [liabilityType, setLiabilityType] = useState('');
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [description, setDescription] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!liabilityName || !liabilityType || !amount || !dueDate) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      'Success',
-      `Liability "${liabilityName}" added successfully!`,
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
+    try {
+      await addLiability({
+        name: liabilityName,
+        type: liabilityType as any,
+        amount: parseFloat(amount),
+        dueDate,
+        status: 'unpaid',
+        description: description || undefined,
+      });
+      
+      Alert.alert(
+        'Success',
+        `Liability "${liabilityName}" added successfully!`,
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (

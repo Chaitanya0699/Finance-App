@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, CreditCard, Chrome as Home, Car, User, Building2, Calendar, FileText, DollarSign, Check, Percent } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useLoans } from '../hooks/useFirebaseData';
 
 const loanTypes = [
   { id: 'home', name: 'Home Loan', icon: <Home size={24} color="#ffffff" />, color: '#3B82F6' },
@@ -24,6 +25,7 @@ const loanTypes = [
 
 export default function AddLoanScreen() {
   const router = useRouter();
+  const { addLoan } = useLoans();
   const [loanName, setLoanName] = useState('');
   const [loanType, setLoanType] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -33,17 +35,34 @@ export default function AddLoanScreen() {
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!loanName || !loanType || !totalAmount || !interestRate) {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
 
-    Alert.alert(
-      'Success',
-      `Loan "${loanName}" added successfully!`,
-      [{ text: 'OK', onPress: () => router.back() }]
-    );
+    try {
+      await addLoan({
+        name: loanName,
+        type: loanType as any,
+        totalAmount: parseFloat(totalAmount),
+        interestRate: parseFloat(interestRate),
+        duration: duration ? parseInt(duration) : undefined,
+        emiAmount: emiAmount ? parseFloat(emiAmount) : undefined,
+        monthsPaid: 0,
+        startDate,
+        status: 'active',
+        notes: notes || undefined,
+      });
+      
+      Alert.alert(
+        'Success',
+        `Loan "${loanName}" added successfully!`,
+        [{ text: 'OK', onPress: () => router.back() }]
+      );
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (
